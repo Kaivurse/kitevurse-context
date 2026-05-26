@@ -1,6 +1,6 @@
 # CLAUDE-REFERENCE-FULL.md — KiteVurse Complete Technical Reference
 
-Generated: 2026-05-25 | Last updated: 2026-05-26 (gap analysis — migration 036, destination_areas, kite_hubs, DENNIS dashboard, scripts/data-collection, ingestion state corrections)  
+Generated: 2026-05-25 | Last updated: 2026-05-26 (nightly update — DB state queried 2026-05-26T10:57:54)  
 Source: schema_tables.json + all migration files + Edge Function source + frontend source  
 Do NOT use Notes/DBSCHEMA.md — it is a pre-normalization snapshot and is stale.
 
@@ -366,12 +366,14 @@ Likely scope:
 |---|---|
 | Perplexity v4 collection (P7–P15, all 25 destinations) | ✅ Complete |
 | Perplexity parser (P7–P15 → production tables) | ✅ Complete |
-| Google Places data (2,264 rows collected) | ✅ Collected |
+| Google Places data (2,388 rows in google_places_raw) | ✅ Collected |
 | Google Places admin review queue | ✅ Built + used |
-| Google Places ingestion (staging → production) | ✅ Complete |
-| destination_areas (~175 rows, P14) | ✅ Complete |
-| kite_hubs (~147 rows, P15) | ✅ Complete |
+| Google Places ingestion (staging → production) | ✅ Complete (300 approved_social_intel rows) |
+| destination_areas (177 rows, P14) | ✅ Complete |
+| kite_hubs (139 rows, P15) | ✅ Complete |
 | Data collection scripts in repo (`scripts/data-collection/`) | ✅ Complete |
+| Nightly auto-update script (CLAUDE-REFERENCE-FULL.md) | ✅ Complete |
+| Public context mirror (kitevurse-context repo) | ✅ Complete |
 | DENNIS ops dashboard (`/admin/jarvis`) | ✅ Built (placeholder data) |
 | Mobile rebuild | 🔴 Not started |
 | Data wiring (Sections 01–05 frontend) | 🔴 Not started |
@@ -664,7 +666,7 @@ These tables have **public read** RLS policies (anon can read directly).
 
 ---
 
-**destination_wifi** — WiFi and connectivity data
+**destination_wifi** — WiFi and connectivity data (8 rows)
 
 | Column | Type |
 |--------|------|
@@ -691,7 +693,7 @@ These tables have **public read** RLS policies (anon can read directly).
 
 ---
 
-**nightlife_venues** — Bars, clubs, live music venues
+**nightlife_venues** — Bars, clubs, live music venues (544 rows)
 
 | Column | Type |
 |--------|------|
@@ -722,7 +724,7 @@ These tables have **public read** RLS policies (anon can read directly).
 
 ---
 
-**no_wind_activities** — Activities for wind-free days
+**no_wind_activities** — Activities for wind-free days (416 rows)
 
 | Column | Type |
 |--------|------|
@@ -754,7 +756,7 @@ These tables have **public read** RLS policies (anon can read directly).
 
 ---
 
-**recovery_services** — Massage, physio, sports recovery
+**recovery_services** — Massage, physio, sports recovery (444 rows)
 
 | Column | Type |
 |--------|------|
@@ -784,7 +786,7 @@ These tables have **public read** RLS policies (anon can read directly).
 
 ---
 
-**restaurants** — Dining options
+**restaurants** — Dining options (623 rows)
 
 | Column | Type |
 |--------|------|
@@ -816,7 +818,7 @@ These tables have **public read** RLS policies (anon can read directly).
 
 ---
 
-**sim_card_options** — Mobile data options per destination
+**sim_card_options** — Mobile data options per destination (0 rows)
 
 | Column | Type |
 |--------|------|
@@ -846,7 +848,7 @@ These tables have **public read** RLS policies (anon can read directly).
 
 ---
 
-**transportation** — Scooter/car/transport vendors per destination
+**transportation** — Scooter/car/transport vendors per destination (464 rows)
 
 | Column | Type |
 |--------|------|
@@ -868,7 +870,7 @@ These tables have **public read** RLS policies (anon can read directly).
 
 ---
 
-**visa_requirements** — Entry requirements per destination/passport pair
+**visa_requirements** — Entry requirements per destination/passport pair (251 rows)
 
 | Column | Type |
 |--------|------|
@@ -915,7 +917,7 @@ These tables have **public read** RLS policies (anon can read directly).
 
 ---
 
-**coworking_spaces** — Co-working spaces and wifi cafés
+**coworking_spaces** — Co-working spaces and wifi cafés (274 rows)
 
 Key columns: destination_id FK, name, venue_type, address, google_maps_url, website, phone, wifi_speed_mbps_down/up, wifi_reliability, has_power_outlets, has_ac, has_phone_booths, price_model, day_pass_usd, monthly_membership_usd, min_spend_usd, opening_hours, noise_level, best_hours_for_work, rating_for_work, rating, worth_it_verdict, data_source, manually_verified, last_verified_at, notes, is_active, parsed_data, parsed_at, needs_refresh_by, created_at, updated_at.
 
@@ -923,7 +925,7 @@ RLS: Public read enabled.
 
 ---
 
-**culture_safety** — Language, safety, customs, tipping per destination
+**culture_safety** — Language, safety, customs, tipping per destination (25 rows)
 
 Key columns: destination_id UUID UNIQUE FK, primary_language, english_tourist_areas, english_general_public, essential_phrases (jsonb), overall_safety_rating, kite_beach_safety_rating, safe_zones/avoid_zones (text[]), petty_crime_risk/violent_crime_risk, common_scams (text[]), night_safety_notes, solo_female_safety_notes, dress_code_beach/town, tipping_restaurants_pct/massage_usd/taxi_pct/hotel_usd_per_day, tipping_expected, photography_restrictions, religious_considerations, alcohol_available, lgbtq_safety_notes, data_source, manually_verified, notes, parsed_data, parsed_at, needs_refresh_by, created_at, updated_at.
 
@@ -931,7 +933,7 @@ RLS: Public read enabled.
 
 ---
 
-**medical_emergency** — Emergency contacts, hospitals, rescue protocol per destination
+**medical_emergency** — Emergency contacts, hospitals, rescue protocol per destination (0 rows)
 
 Key columns: destination_id UUID UNIQUE FK, hospitals/clinics (jsonb), lifeguard_at_kite_spot, lifeguard_seasonal, water_rescue_boat, water_emergency_number, rescue_response_time_min, kite_school_rescue_protocol, pharmacy_name/address/hours_24hr, anti_inflammatories_otc, emergency_police/ambulance/fire/coast_guard/tourist_police, country_calling_code, standard_insurance_covers_kite, recommended_insurers (text[]), avg_insurance_2week_usd, schools_require_insurance, decompression_chamber_location/km, decompression_relevant, data_source, manually_verified, notes, parsed_data, parsed_at, needs_refresh_by, created_at, updated_at.
 
@@ -943,7 +945,7 @@ RLS: Public read enabled.
 
 ---
 
-**social_intel_staging** — Raw ingested posts from all sources
+**social_intel_staging** — Raw ingested posts from all sources (352 rows)
 
 | Column | Type |
 |--------|------|
@@ -972,7 +974,7 @@ Unique partial index on (destination_id, source, coalesced_category) WHERE statu
 
 ---
 
-**wind_community_reports** — Parsed wind intelligence (approved staging records promoted here)
+**wind_community_reports** — Parsed wind intelligence (approved staging records promoted here) (0 rows)
 
 Key columns: destination_id FK, report_date, avg_wind_knots, conditions, hazard_flags (text[]), author_name, source, post_url, verified (default false), created_at, updated_at.
 
@@ -980,7 +982,7 @@ RLS: Public read. Admin write.
 
 ---
 
-**accommodation_reviews** — Sourced accommodation feedback
+**accommodation_reviews** — Sourced accommodation feedback (0 rows)
 
 Key columns: destination_id FK, accommodation_type, price_per_night_usd, rating INT CHECK (1–5), reviewer_name, review_text, source, post_url, verified, created_at, updated_at.
 
@@ -988,7 +990,7 @@ RLS: Public read. Admin write.
 
 ---
 
-**destination_condition_updates** — Timestamped condition reports
+**destination_condition_updates** — Timestamped condition reports (0 rows)
 
 Key columns: destination_id FK, condition_type, severity, description, source, post_url, verified_at, created_at, updated_at.
 
@@ -1002,7 +1004,7 @@ RLS: Public read. Admin write.
 
 ---
 
-**open_meteo_raw** — Monthly historical weather per destination/year (migration 021)
+**open_meteo_raw** — Monthly historical weather per destination/year (migration 021) (300 rows)
 
 | Column | Type |
 |--------|------|
@@ -1020,7 +1022,7 @@ UNIQUE (destination_id, year, month). RLS: Public read.
 
 ---
 
-**google_places_raw** — Venue records from Google Places API (migration 022)
+**google_places_raw** — Venue records from Google Places API (migration 022) (2,388 rows)
 
 | Column | Type |
 |--------|------|
@@ -1039,7 +1041,7 @@ UNIQUE (destination_id, category, place_name). RLS: Public read.
 
 ---
 
-**seabreeze_raw** — Forum threads scraped from seabreeze.com.au (migration 023)
+**seabreeze_raw** — Forum threads scraped from seabreeze.com.au (migration 023) (26 rows)
 
 | Column | Type |
 |--------|------|
@@ -1060,7 +1062,7 @@ UNIQUE (destination_id, thread_url). RLS: Public read.
 
 ---
 
-**rome2rio_raw** — Ground transport routes per destination (migration 027)
+**rome2rio_raw** — Ground transport routes per destination (migration 027) (0 rows)
 
 Key columns: destination_id FK, route_type, origin_name, origin_iata, destination_name, destination_iata, transport_mode, operator_name, duration_hours, price_usd_from, notes, raw_html, fetched_at, created_at.
 
@@ -1070,7 +1072,7 @@ RLS: Public read.
 
 ---
 
-**noaa_copernicus_raw** — Monthly wave + SST climatology (migration 028)
+**noaa_copernicus_raw** — Monthly wave + SST climatology (migration 028) (300 rows)
 
 Key columns: destination_id FK, year (default 2024), month CHECK(1–12), hs_mean/min/max/std (wave height in meters), tp_mean (wave period seconds), direction (compass), sst_mean/min/max (°C from ERA5 hourly), sst_anomaly_c (nullable), fetched_at.
 
@@ -1078,7 +1080,7 @@ UNIQUE (destination_id, year, month). RLS: Public read. Status in staging: `appr
 
 ---
 
-**approved_social_intel** — Audit trail for every approved staging batch (migration 029)
+**approved_social_intel** — Audit trail for every approved staging batch (migration 029) (300 rows)
 
 | Column | Type |
 |--------|------|
@@ -1099,25 +1101,25 @@ RLS: Public read.
 
 ---
 
-**facebook_posts** — Raw posts crawled from Facebook groups via Apify
+**facebook_posts** — Raw posts crawled from Facebook groups via Apify (0 rows)
 
 Key columns: id uuid PK, group_id/group_name, post_id (text UNIQUE), post_url, post_text, post_author, post_timestamp, comment_count, reaction_count, created_at, updated_at.
 
 ---
 
-**facebook_engagement_queue** — Claude drafts + approval workflow
+**facebook_engagement_queue** — Claude drafts + approval workflow (7 rows)
 
 Key columns: id uuid PK, post_id (text), group_id, draft_comment (text), claude_tone, relevance_score (1–10), category, approval_status CHECK (pending/approved/rejected/edited), admin_edits, created_at, updated_at.
 
 ---
 
-**facebook_engagement_log** — Permanent audit log of all posted comments
+**facebook_engagement_log** — Permanent audit log of all posted comments (0 rows)
 
 RLS: Public read + insert/update (MVP).
 
 ---
 
-**approval_queue** — Universal approval queue for all manual review workflows (migration 025)
+**approval_queue** — Universal approval queue for all manual review workflows (migration 025) (6 rows; 4 pending)
 
 | Column | Type |
 |--------|------|
@@ -1143,7 +1145,7 @@ RLS: Public read/insert/update (MVP — tighten in Phase 5).
 
 ---
 
-**kite_spots** — Typed per-spot geographic and safety data (migration 030)
+**kite_spots** — Typed per-spot geographic and safety data (migration 030) (117 rows)
 
 Key columns: id uuid PK, destination_id FK, spot_name, gps_lat/gps_lng, gps_source, spot_type, wind_angle, ideal_wind_direction, wind_direction_range, bottom_type, launch_depth, skill_level, crowd_level_peak (1–10), beach_space_rigging, downwind_hazards, emergency_exit, tide_dependent, data_source (added migration 035), is_active (added migration 035), created_at, updated_at.
 
@@ -1151,7 +1153,7 @@ One destination may have 1–3 named spots.
 
 ---
 
-**spot_regulations** — Operational rules, seasonal restrictions, rescue info per destination (migration 031)
+**spot_regulations** — Operational rules, seasonal restrictions, rescue info per destination (migration 031) (27 rows)
 
 Key columns: id uuid PK, destination_id UUID UNIQUE FK, rescue_operator_names (text[]), rescue_coverage_months, rescue_contact, rescue_response_time_mins, beach_patrol_seasonal/months, permit_required, permit_details/where_to_get, permit_cost_usd, seasonal_restrictions, created_at, updated_at.
 
@@ -1159,7 +1161,7 @@ One row per destination (UNIQUE on destination_id).
 
 ---
 
-**destination_kiter_logistics** — Kite-travel-specific customs, airline policy, gear transport (migration 032)
+**destination_kiter_logistics** — Kite-travel-specific customs, airline policy, gear transport (migration 032) (27 rows)
 
 Key columns: id uuid PK, destination_id UUID UNIQUE FK, customs_kite_gear, kite_bag_declared_value_usd, customs_practical_advice, drone_import_rules, airline_kite_policy, foil_transport_notes, gear_rental_available/notes, repair_services_available/notes, local_gear_shops (jsonb), created_at, updated_at.
 
@@ -1171,7 +1173,7 @@ These two tables are populated by the Perplexity parser (`scripts/data-collectio
 
 ---
 
-**destination_areas** — Neighbourhood/area intel per destination (P14 output)
+**destination_areas** — Neighbourhood/area intel per destination (P14 output) (177 rows)
 
 One row per distinct area within a destination. Parser strategy: DELETE auto-generated rows (manually_verified=false) then INSERT fresh rows from P14 JSON.
 
@@ -1195,11 +1197,11 @@ One row per distinct area within a destination. Parser strategy: DELETE auto-gen
 | is_active | boolean (default true) |
 | created_at / updated_at | timestamptz |
 
-Row count: ~175 rows (5–10 areas per destination × 25 destinations).
+Row count: 177 rows (confirmed 2026-05-26).
 
 ---
 
-**kite_hubs** — Kite scene hubs and bases per destination (P15 output)
+**kite_hubs** — Kite scene hubs and bases per destination (P15 output) (139 rows)
 
 One row per distinct hub/base. Parser strategy: DELETE auto-generated rows (manually_verified=false) then INSERT fresh rows from P15 JSON. P15 also writes `scene_summary` and `proximity_reality` to `destination_editorial`.
 
@@ -1225,7 +1227,7 @@ One row per distinct hub/base. Parser strategy: DELETE auto-generated rows (manu
 | is_active | boolean (default true) |
 | created_at / updated_at | timestamptz |
 
-Row count: ~147 rows (2–10 hubs per destination × 25 destinations).
+Row count: 139 rows (confirmed 2026-05-26).
 
 ---
 
@@ -1237,8 +1239,12 @@ Key columns: id, destination_id (text — FK joins via `d.destination_id` not `d
 **airports** — 1,176 large airports + 5 destination-only airports.
 airport_iata CHAR(3) FK added to destinations table.
 
-**research_staging** — Research pipeline staging table (exists in live_table_coverage view).
+**research_staging** — Research pipeline staging table (exists in live_table_coverage view). (569 rows)
 Key columns: destination_slug (text), prompt_id, prompt_name, status (pending_review/approved/parsed/rejected), raw_response, collected_at.
+
+**destination_fitness_summary** — (25 rows)
+
+**destination_fitness_facilities** — (287 rows)
 
 ---
 
@@ -1910,7 +1916,7 @@ All data is hardcoded placeholder. No Supabase queries from any jarvis component
 
 ## 6. DATA INGESTION STATE
 
-Data sourced from CLAUDE.md, commit messages, and schema_tables.json.
+Data sourced from live DB query (2026-05-26T10:57:54).
 
 ### Normalized Tables (core destination data)
 - **101 rows each** across all 10 normalized tables
@@ -1919,48 +1925,77 @@ Data sourced from CLAUDE.md, commit messages, and schema_tables.json.
 - No duplicates — `COUNT(DISTINCT destination_id) = 101` confirmed
 
 ### social_intel_staging
-- **~300 pending rows** after dedup migration (030) ran 2026-05-25
+- **352 rows** (queried 2026-05-26T10:57:54)
+- 0 pending rows remaining (pending_social_intel = 0)
 - Pre-dedup: 453 rows (doubled by ingesters running 2-3×)
 - By source: 413 google_places + 39 seabreeze + 1 reddit
 
 ### google_places_raw
+- **2,388 rows** confirmed (queried 2026-05-26T10:57:54)
 - Data exists for all 11 categories across active destinations
-- All rows `status='pending'` — requires admin review
 - Admin review queue: SocialIntelReviewQueue.tsx
 
 ### open_meteo_raw
-- **300 rows confirmed** — 12 rows per destination × 25 destinations (commit `4e813ff` 2026-05-22)
+- **300 rows confirmed** — 12 rows per destination × 25 destinations
 - Fetched via `fetch-open-meteo` Edge Function using Open-Meteo archive API (free, daily data aggregated to monthly)
 - All 25 active destinations covered after coordinates were populated for 15 missing spots
 
 ### noaa_copernicus_raw
-- **300 rows confirmed** — 12 rows per destination × 25 destinations (commit `bd142a6` 2026-05-23)
+- **300 rows confirmed** — 12 rows per destination × 25 destinations
 - Fetched via `ingest-noaa-copernicus-data` Edge Function using Open-Meteo Marine API (ERA5 reanalysis)
 - Wave: hs_mean/min/max/std, tp_mean, compass direction. SST: sst_mean/min/max
 - Status in staging: `approved` (auto-approved, confidence 9.0) — does not need admin queue review
 
 ### seabreeze_raw
-- **~50 rows** across 25 destinations (commit `8d7bcff` 2026-05-22 — full run: 25 destinations, 50 rows, 0 errors, 79s)
-- 39 pending staging rows in social_intel_staging (from dedup migration counts)
+- **26 rows** (queried 2026-05-26T10:57:54)
+- Staging rows in social_intel_staging sourced from seabreeze
+
+### approved_social_intel
+- **300 rows** confirmed (queried 2026-05-26T10:57:54)
 
 ### research_staging
+- **569 rows** (queried 2026-05-26T10:57:54)
 - Populated by Perplexity collector scripts (v1–v4). Contains raw JSON responses for P7–P15.
 - P7–P13: collected by v3 collector. P14–P15: collected by v4 collector (active, in `scripts/data-collection/`)
 - All 25 active destinations × prompts P7–P15 parsed and written to production tables (completed 2026-05-25)
 
 ### destination_areas
-- **~175 rows** across 25 active destinations (5–10 areas per destination)
+- **177 rows** confirmed (queried 2026-05-26T10:57:54)
 - Populated by `kitevurse_perplexity_parser.py` parse_p14 (2026-05-25)
 - `destination_editorial.areas_recommendation` also populated for all 25
 
 ### kite_hubs
-- **~147 rows** across 25 active destinations (2–10 hubs per destination)
+- **139 rows** confirmed (queried 2026-05-26T10:57:54)
 - Populated by `kitevurse_perplexity_parser.py` parse_p15 (2026-05-25)
 - `destination_editorial.scene_summary` + `proximity_reality` populated for all 25
+
+### kite_spots
+- **117 rows** (queried 2026-05-26T10:57:54)
+
+### visa_requirements
+- **251 rows** (queried 2026-05-26T10:57:54)
+
+### sim_card_options
+- **0 rows** — not yet collected
+
+### rome2rio_raw
+- **0 rows** — not yet collected
+
+### medical_emergency
+- **0 rows** — not yet collected
+
+### wind_community_reports / accommodation_reviews / destination_condition_updates
+- **0 rows each** — not yet populated
 
 ### airports
 - 1,176 large airports + 5 destination-only airports
 - All 25 active destinations wired with airport_iata FK
+
+### approval_queue
+- **6 rows** total; **4 pending** (queried 2026-05-26T10:57:54)
+
+### facebook_engagement_queue
+- **7 rows** (queried 2026-05-26T10:57:54)
 
 ---
 
@@ -2089,10 +2124,12 @@ Runs at 5:00 AM daily via Windows Task Scheduler.
 
 | Script | Purpose |
 |--------|---------|
-| `nightly_update.py` | Main Python script — queries Supabase, calls Claude API, writes file, git commits + pushes |
-| `run_nightly_update.ps1` | PowerShell launcher — loads Supabase + Anthropic keys from Credential Manager |
+| `nightly_update.py` | Main Python script — queries Supabase, calls Claude API, writes file, git commits + pushes. Also pushes to public kitevurse-context mirror repo. |
+| `run_nightly_update.ps1` | PowerShell launcher — loads Supabase + Anthropic + GitHub keys from Credential Manager |
 | `schedule_task.ps1` | One-time Task Scheduler registration (run once → never again) |
 | `nightly_update.log` | Rolling log, 30-day retention |
+
+Public mirror URL (live): `https://raw.githubusercontent.com/Kaivurse/kitevurse-context/main/CLAUDE-REFERENCE-FULL.md`
 
 **First-time setup (one command):**
 ```powershell
@@ -2125,7 +2162,7 @@ has the current reference file — no manual context sync needed.
 **Fetch instruction (top of every prompt):**
 ```
 At the start of every session, fetch and read:
-https://raw.githubusercontent.com/Kaivurse/kite-explorer/main/CLAUDE-REFERENCE-FULL.md
+https://raw.githubusercontent.com/Kaivurse/kitevurse-context/main/CLAUDE-REFERENCE-FULL.md
 This is the single source of truth for all KiteVurse context.
 ```
 
@@ -2135,7 +2172,7 @@ This is the single source of truth for all KiteVurse context.
 
 ```
 At the start of every session, fetch and read:
-https://raw.githubusercontent.com/Kaivurse/kite-explorer/main/CLAUDE-REFERENCE-FULL.md
+https://raw.githubusercontent.com/Kaivurse/kitevurse-context/main/CLAUDE-REFERENCE-FULL.md
 This is the single source of truth for all KiteVurse context.
 
 You are the strategic advisor for KiteVurse — an AI-powered travel planning platform
@@ -2159,7 +2196,7 @@ Rules:
 
 ```
 At the start of every session, fetch and read:
-https://raw.githubusercontent.com/Kaivurse/kite-explorer/main/CLAUDE-REFERENCE-FULL.md
+https://raw.githubusercontent.com/Kaivurse/kitevurse-context/main/CLAUDE-REFERENCE-FULL.md
 This is the single source of truth for all KiteVurse context.
 
 You are the frontend developer for KiteVurse.
@@ -2183,7 +2220,7 @@ Rules:
 
 ```
 At the start of every session, fetch and read:
-https://raw.githubusercontent.com/Kaivurse/kite-explorer/main/CLAUDE-REFERENCE-FULL.md
+https://raw.githubusercontent.com/Kaivurse/kitevurse-context/main/CLAUDE-REFERENCE-FULL.md
 This is the single source of truth for all KiteVurse context.
 
 You are the database and backend engineer for KiteVurse.
@@ -2207,7 +2244,7 @@ Rules:
 
 ```
 At the start of every session, fetch and read:
-https://raw.githubusercontent.com/Kaivurse/kite-explorer/main/CLAUDE-REFERENCE-FULL.md
+https://raw.githubusercontent.com/Kaivurse/kitevurse-context/main/CLAUDE-REFERENCE-FULL.md
 This is the single source of truth for all KiteVurse context.
 
 You are the data collection engineer for KiteVurse.
@@ -2233,7 +2270,7 @@ Rules:
 
 ```
 At the start of every session, fetch and read:
-https://raw.githubusercontent.com/Kaivurse/kite-explorer/main/CLAUDE-REFERENCE-FULL.md
+https://raw.githubusercontent.com/Kaivurse/kitevurse-context/main/CLAUDE-REFERENCE-FULL.md
 This is the single source of truth for all KiteVurse context.
 
 You are the trip engine engineer for KiteVurse.
@@ -2257,7 +2294,7 @@ Rules:
 
 ```
 At the start of every session, fetch and read:
-https://raw.githubusercontent.com/Kaivurse/kite-explorer/main/CLAUDE-REFERENCE-FULL.md
+https://raw.githubusercontent.com/Kaivurse/kitevurse-context/main/CLAUDE-REFERENCE-FULL.md
 This is the single source of truth for all KiteVurse context.
 
 You are the admin and review systems engineer for KiteVurse.
@@ -2280,7 +2317,7 @@ Rules:
 
 ```
 At the start of every session, fetch and read:
-https://raw.githubusercontent.com/Kaivurse/kite-explorer/main/CLAUDE-REFERENCE-FULL.md
+https://raw.githubusercontent.com/Kaivurse/kitevurse-context/main/CLAUDE-REFERENCE-FULL.md
 This is the single source of truth for all KiteVurse context.
 
 You are the DevOps and infrastructure engineer for KiteVurse.
@@ -2309,7 +2346,7 @@ Rules:
 
 ```
 At the start of every session, fetch and read:
-https://raw.githubusercontent.com/Kaivurse/kite-explorer/main/CLAUDE-REFERENCE-FULL.md
+https://raw.githubusercontent.com/Kaivurse/kitevurse-context/main/CLAUDE-REFERENCE-FULL.md
 This is the single source of truth for all KiteVurse context.
 
 You are the marketing and community strategist for KiteVurse.
