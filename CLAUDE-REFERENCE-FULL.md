@@ -1,6 +1,6 @@
 # CLAUDE-REFERENCE-FULL.md — KiteVurse Complete Technical Reference
 
-Generated: 2026-05-25 | Last updated: 2026-05-28 (manual update — new tables 037–040, v5 collector, P16–P18)  
+Generated: 2026-05-25 | Last updated: 2026-05-28 (manual update — new tables 037–041, v5 collector, P16–P19; build_destination_object.py updated for P19)  
 Source: schema_tables.json + all migration files + Edge Function source + frontend source  
 Do NOT use Notes/DBSCHEMA.md — it is a pre-normalization snapshot and is stale.
 
@@ -109,17 +109,17 @@ Not a booking site. Not a directory. The honest, AI-powered planning tool the ki
 
 ### PHASE 1 — Data Complete ✅
 
-**Complete as of May 28, 2026 (extended — P16–P18 + new tables added).**
+**Complete as of May 28, 2026 (extended — P16–P19 + new tables added).**
 
 All steps finished:
 - Perplexity P7–P15 collected (v4 collector) and parsed to production tables for all 25 destinations
-- Perplexity P16–P18 collected and parsed (v5 collector) — new tables kite_schools, kite_accommodations, kite_gear_services populated
+- Perplexity P16–P19 collected and parsed (v5 collector) — new tables kite_schools, kite_accommodations, kite_gear_services, destination_daily_living populated
 - P9 parser upgraded: now also writes to `destination_wind_seasons` (migration 037) in addition to `destination_conditions`
 - Google Places: 2,264 rows collected, admin review queue built and used, approved rows ingested
 - Admin Review Queue: SocialIntelReviewQueue.tsx + AdminReviewQueue.tsx built and live at `/admin/review`
 - Ingestion scripts: `scripts/data-collection/kitevurse_places_ingester.py` + `kitevurse_perplexity_parser.py` — complete, in repo
 - destination_areas: ~177 rows (P14). kite_hubs: ~139 rows (P15). destination_editorial updated for all 25.
-- destination_wind_seasons: 50 rows (P9 — migration 037). kite_schools: 112 rows (P16 — migration 038). kite_accommodations: 141 rows (P17 — migration 039). kite_gear_services: ~163 rows (P18 — migration 040).
+- destination_wind_seasons: 50 rows (P9 — migration 037). kite_schools: 112 rows (P16 — migration 038). kite_accommodations: 141 rows (P17 — migration 039). kite_gear_services: ~163 rows (P18 — migration 040). destination_daily_living: 25 rows (P19 — migration 041).
 - Collector upgraded to v5 (`kitevurse_perplexity_collector_v5.py`) — fixed prompts P7/P9/P12/P13 (dual numbers, zero tolerance, confirmed names, per-spot regulations)
 - `run_collector.ps1` added as Perplexity collector launcher (mirrors run_parser.ps1 pattern)
 - `STANDARDS.md` created at `scripts/data-collection/STANDARDS.md` — coding standards for all data-collection scripts
@@ -348,8 +348,8 @@ Likely scope:
 | Item | Status |
 |---|---|
 | Perplexity v4 collection (P7–P15, all 25 destinations) | ✅ Complete |
-| Perplexity v5 collection (P16–P18, all 25 destinations) | ✅ Complete |
-| Perplexity parser (P7–P18 → production tables) | ✅ Complete |
+| Perplexity v5 collection (P16–P19, all 25 destinations) | ✅ Complete |
+| Perplexity parser (P7–P19 → production tables) | ✅ Complete |
 | Google Places data (2,388 rows in google_places_raw) | ✅ Collected |
 | Google Places admin review queue | ✅ Built + used |
 | Google Places ingestion (staging → production) | ✅ Complete (300 approved_social_intel rows) |
@@ -359,8 +359,10 @@ Likely scope:
 | kite_schools (112 rows, P16 — migration 038) | ✅ Complete |
 | kite_accommodations (141 rows, P17 — migration 039) | ✅ Complete |
 | kite_gear_services (~163 rows, P18 — migration 040) | ✅ Complete |
+| destination_daily_living (25 rows, P19 — migration 041) | ✅ Complete |
 | Data collection scripts in repo (`scripts/data-collection/`) | ✅ Complete |
 | run_collector.ps1 launcher + STANDARDS.md | ✅ Complete |
+| build_destination_object.py updated for P19 (destination_daily_living included in output) | ✅ Complete |
 | Nightly auto-update script (CLAUDE-REFERENCE-FULL.md) | ✅ Complete |
 | Public context mirror (kitevurse-context repo) | ✅ Complete |
 | DENNIS ops dashboard (`/admin/jarvis`) | ✅ Built (placeholder data) |
@@ -1337,6 +1339,52 @@ Row count: ~163 rows (confirmed 2026-05-28).
 
 ---
 
+**destination_daily_living** — Practical daily-life logistics per destination (P19 output) (25 rows)
+
+One row per destination. UPSERT on `destination_id`. Covers payment methods, transport, language, SIM cards, water/food safety, dress codes, and tipping. `supermarkets` column is always null (reserved for future sourcing).
+
+| Column | Type |
+|--------|------|
+| id | uuid PK |
+| destination_id | uuid FK → destinations (UNIQUE) |
+| payment_app_name | text |
+| payment_app_tourist_ok | boolean |
+| payment_app_how_to | text |
+| usd_accepted | boolean |
+| card_reliability | text |
+| atm_availability | text |
+| transport_primary | text |
+| transport_price_range | text |
+| transport_negotiate | boolean |
+| ride_app_available | text |
+| board_bag_transport | text |
+| car_rental | text |
+| english_sufficient | boolean |
+| english_notes | text |
+| key_phrases | jsonb (array of {phrase, meaning, why_it_matters}) |
+| sim_worth_it | boolean |
+| sim_carrier | text |
+| sim_where_to_buy | text |
+| tap_water_safe | boolean |
+| food_safety_notes | text |
+| supermarkets | jsonb (always null — reserved for future sourcing) |
+| beach_dress | text |
+| offbeach_dress | text |
+| cultural_context | text |
+| bargaining | text |
+| photography_notes | text |
+| tip_restaurant_pct | integer |
+| tip_service_providers | text |
+| tipping_importance | text |
+| data_source | text (default 'perplexity_sonar_pro') |
+| manually_verified | boolean (default false) |
+| needs_refresh_by | date |
+| created_at / updated_at | timestamptz |
+
+Row count: 25 rows (confirmed 2026-05-28).
+
+---
+
 ### 1J. Supporting Tables
 
 **destination_media** — Hero images and photos stored in Supabase Storage.
@@ -1850,6 +1898,7 @@ Text priority: `your_edits` (Danny's edits) → `draft_text` (original Claude dr
 | `038_create_kite_schools.sql` | Created `kite_schools` (P16 — Perplexity-sourced school lesson/amenity intel). Separate from `schools` (Google Places). RLS public read. 112 rows across 25 destinations. | ✅ Applied |
 | `039_create_kite_accommodations.sql` | Created `kite_accommodations` (P17 — kite-community accommodation intel: proximity to launch, gear storage, kite packages). RLS public read. 141 rows across 25 destinations. | ✅ Applied |
 | `040_create_kite_gear_services.sql` | Created `kite_gear_services` (P18 — gear rental operators + repair shops per destination). `service_type` = 'rental'/'repair'. Includes `stranded_risk` (low/medium/high) at destination level. RLS public read. ~163 rows across 25 destinations. | ✅ Applied |
+| `041_destination_daily_living.sql` | Created `destination_daily_living` (P19 — payment, transport, language, SIM, water safety, dress codes, tipping per destination). UPSERT on destination_id, one row per destination. RLS public read. 25 rows across 25 destinations. | ✅ Applied |
 
 **⚠️ Migrations NOT Applied:**
 - `supabase/migrations/099` (if it exists) — drops source columns. DO NOT APPLY.
@@ -2100,6 +2149,11 @@ Data sourced from live DB query (2026-05-26T10:57:54).
 - Populated by `kitevurse_perplexity_parser.py` parse_p18 (P18 Gear & Repair prompt — migration 040)
 - One row per operator or repair shop. service_type = 'rental' or 'repair'. Includes destination-level stranded_risk.
 
+### destination_daily_living
+- **25 rows** confirmed (2026-05-28)
+- Populated by `kitevurse_perplexity_parser.py` parse_p19 (P19 Daily Living prompt — migration 041)
+- One row per destination (UPSERT on destination_id). Covers payment, transport, language, SIM, water/food, dress, tipping. supermarkets always null.
+
 ### kite_spots
 - **117 rows** (queried 2026-05-26T10:57:54)
 
@@ -2246,13 +2300,22 @@ Key mechanism: both scripts read `Supabase CLI:supabase` from Windows Credential
 | P16 | Kite Schools | `kite_schools` (DELETE+INSERT, manually_verified=false rows only) |
 | P17 | Kite Accommodations | `kite_accommodations` (DELETE+INSERT, manually_verified=false rows only) |
 | P18 | Gear & Repair | `kite_gear_services` (DELETE+INSERT, manually_verified=false rows only) |
+| P19 | Daily Living | `destination_daily_living` (UPSERT on destination_id, one row per destination) |
 
-Run from kite-explorer root: `.\scripts\data-collection\run_parser.ps1 --prompt 16 --dest dakhla-morocco`
+Run from kite-explorer root: `.\scripts\data-collection\run_parser.ps1 --prompt 19 --dest dakhla-morocco`
 
 ### Collector Architecture (v5)
 All prompts live in a single PROMPTS dict with an `enabled` boolean. No _DISABLED_PROMPTS dict. Disabled prompts have `enabled: False` and are skipped automatically by the run loop. Every prompt entry declares `max_tokens` and `temperature` explicitly — no function defaults. All file paths are resolved relative to `Path(__file__).parent`. Credentials are loaded from env vars (`PERPLEXITY_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY_KV`, `SUPABASE_URL_KV`) with a hard `sys.exit(1)` at startup if any are missing. Staging insert return value is checked — a failed insert marks the call key in `failed_calls` so `--retry-failed` picks it up on the next run. A token proximity warning fires when response length exceeds 90% of `max_tokens × 3.5` chars. Coding standards for all data-collection scripts are documented in `scripts/data-collection/STANDARDS.md`.
 
-**v5 prompt inventory:** P7 (Culture & Safety), P8 (Visa), P9 (Wind & Water — now also writes destination_wind_seasons), P10 (Destination Profile), P11 (Spot Geometry), P12 (Regulations — fixed: per-spot format), P13 (Logistics — fixed: confirmed names), P14 (Neighborhood & Area Intel), P15 (Kite Hubs & Scene), P16 (Kite Schools → kite_schools), P17 (Kite Accommodations → kite_accommodations), P18 (Gear & Repair → kite_gear_services). P7/P9/P12/P13 were also fixed in v5 for dual numbers, zero tolerance, confirmed names, and per-spot regulations respectively.
+**v5 prompt inventory:** P7 (Culture & Safety), P8 (Visa), P9 (Wind & Water — now also writes destination_wind_seasons), P10 (Destination Profile), P11 (Spot Geometry), P12 (Regulations — fixed: per-spot format), P13 (Logistics — fixed: confirmed names), P14 (Neighborhood & Area Intel), P15 (Kite Hubs & Scene), P16 (Kite Schools → kite_schools), P17 (Kite Accommodations → kite_accommodations), P18 (Gear & Repair → kite_gear_services), **P19 (Daily Living → destination_daily_living)**. P7/P9/P12/P13 were also fixed in v5 for dual numbers, zero tolerance, confirmed names, and per-spot regulations respectively.
+
+### Destination Object Builder
+
+`build_destination_object.py` — queries all 40 tables for a destination slug and writes a single nested JSON to `scripts/data-collection/outputs/<slug>_destination_object.json`. Includes `destination_daily_living` (P19) as of 2026-05-28.
+
+Run: `.\scripts\data-collection\run_destination_object.ps1 --slug diani-beach-kenya`
+
+**When a new table is added to the DB, update this script**: use `one()` for single-row tables (UNIQUE on destination_id), `multi()` for multi-row tables, then add the variable to the output dict.
 
 ---
 
