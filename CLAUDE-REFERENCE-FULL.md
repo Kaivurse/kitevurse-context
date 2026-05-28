@@ -1,6 +1,6 @@
 # CLAUDE-REFERENCE-FULL.md — KiteVurse Complete Technical Reference
 
-Generated: 2026-05-25 | Last updated: 2026-05-28 (manual update — new tables 037–040, v5 collector, P16–P18)  
+Generated: 2026-05-25 | Last updated: 2026-05-28 (nightly auto-update)  
 Source: schema_tables.json + all migration files + Edge Function source + frontend source  
 Do NOT use Notes/DBSCHEMA.md — it is a pre-normalization snapshot and is stale.
 
@@ -366,7 +366,7 @@ Likely scope:
 
 ---
 
-### Current Status (Updated May 26, 2026 — Phase 1 Complete, Phase 2 Starting)
+### Current Status (Updated 2026-05-28 — Phase 1 Complete, Phase 2 Starting)
 
 | Item | Status |
 |---|---|
@@ -376,12 +376,12 @@ Likely scope:
 | Google Places data (2,388 rows in google_places_raw) | ✅ Collected |
 | Google Places admin review queue | ✅ Built + used |
 | Google Places ingestion (staging → production) | ✅ Complete (300 approved_social_intel rows) |
-| destination_wind_seasons (50 rows, P9 — migration 037) | ✅ Complete |
+| destination_wind_seasons (48 rows updated last 24h, 48 total — P9 — migration 037) | ✅ Complete |
 | destination_areas (177 rows, P14) | ✅ Complete |
 | kite_hubs (139 rows, P15) | ✅ Complete |
-| kite_schools (112 rows, P16 — migration 038) | ✅ Complete |
+| kite_schools (113 rows, P16 — migration 038) | ✅ Complete |
 | kite_accommodations (141 rows, P17 — migration 039) | ✅ Complete |
-| kite_gear_services (~163 rows, P18 — migration 040) | ✅ Complete |
+| kite_gear_services (161 rows, P18 — migration 040) | ✅ Complete |
 | Data collection scripts in repo (`scripts/data-collection/`) | ✅ Complete |
 | run_collector.ps1 launcher + STANDARDS.md | ✅ Complete |
 | Nightly auto-update script (CLAUDE-REFERENCE-FULL.md) | ✅ Complete |
@@ -1249,7 +1249,7 @@ These four tables are populated by `kitevurse_perplexity_parser.py` after P9/P16
 
 ---
 
-**destination_wind_seasons** — Per-season wind profile per destination (P9 output) (50 rows)
+**destination_wind_seasons** — Per-season wind profile per destination (P9 output) (48 rows)
 
 One row per wind season. Parser strategy: DELETE auto-generated rows (manually_verified=false) then INSERT fresh rows from P9 JSON. P9 also continues to update `destination_conditions` (the single-averaged profile is preserved for backwards compatibility).
 
@@ -1275,11 +1275,11 @@ One row per wind season. Parser strategy: DELETE auto-generated rows (manually_v
 | parsed_at / needs_refresh_by | timestamptz / date |
 | created_at / updated_at | timestamptz |
 
-Row count: 50 rows (confirmed 2026-05-28).
+Row count: 48 rows (confirmed 2026-05-28).
 
 ---
 
-**kite_schools** — Kite school lesson/amenity intel per destination (P16 output) (112 rows)
+**kite_schools** — Kite school lesson/amenity intel per destination (P16 output) (113 rows)
 
 One row per school. Separate from the `schools` table (which is Google Places sourced with a richer schema). This table is Perplexity-sourced with a focused schema for lesson/amenity comparison. Parser strategy: DELETE auto-generated rows (manually_verified=false) then INSERT fresh rows from P16 JSON.
 
@@ -1301,7 +1301,7 @@ One row per school. Separate from the `schools` table (which is Google Places so
 | parsed_data / parsed_at / needs_refresh_by | jsonb / timestamptz / date |
 | created_at / updated_at | timestamptz |
 
-Row count: 112 rows (confirmed 2026-05-28).
+Row count: 113 rows (confirmed 2026-05-28).
 
 ---
 
@@ -1331,7 +1331,7 @@ Row count: 141 rows (confirmed 2026-05-28).
 
 ---
 
-**kite_gear_services** — Gear rental operators and repair shops per destination (P18 output) (~163 rows)
+**kite_gear_services** — Gear rental operators and repair shops per destination (P18 output) (161 rows)
 
 One row per operator/shop. `service_type` = 'rental' or 'repair'. Destination-level `stranded_risk` (low/medium/high) is stored on every row for that destination. Parser strategy: DELETE auto-generated rows then INSERT from P18 JSON.
 
@@ -1356,7 +1356,7 @@ One row per operator/shop. `service_type` = 'rental' or 'repair'. Destination-le
 | parsed_data / parsed_at / needs_refresh_by | jsonb / timestamptz / date |
 | created_at / updated_at | timestamptz |
 
-Row count: ~163 rows (confirmed 2026-05-28).
+Row count: 161 rows (confirmed 2026-05-28).
 
 ---
 
@@ -1368,7 +1368,7 @@ Key columns: id, destination_id (text — FK joins via `d.destination_id` not `d
 **airports** — 1,176 large airports + 5 destination-only airports.
 airport_iata CHAR(3) FK added to destinations table.
 
-**research_staging** — Research pipeline staging table (exists in live_table_coverage view). (569 rows)
+**research_staging** — Research pipeline staging table (exists in live_table_coverage view). (785 rows)
 Key columns: destination_slug (text), prompt_id, prompt_name, status (pending_review/approved/parsed/rejected), raw_response, collected_at.
 
 **destination_fitness_summary** — (25 rows)
@@ -1869,10 +1869,10 @@ Text priority: `your_edits` (Danny's edits) → `draft_text` (original Claude dr
 | `034_visa_requirements_add_destination_id.sql` | Added destination_id UUID FK (nullable) to visa_requirements. Added UNIQUE(destination_id, passport_country_code). | ✅ Applied |
 | `035_ingestion_column_fixes.sql` | Added data_source/is_active to kite_spots; is_active to transportation; data_source to destination_conditions; made visa_required nullable | ✅ Applied |
 | `036_destination_areas_kite_hubs.sql` | Created `destination_areas` (P14 — neighbourhood intel, one row per area) + `kite_hubs` (P15 — kite scene hubs, one row per hub). Added `areas_recommendation`, `scene_summary`, `proximity_reality` columns to `destination_editorial`. RLS public read on both new tables. Idempotent: DROP/CREATE policies, column fixups for reruns. | ✅ Applied |
-| `037_destination_wind_seasons.sql` | Created `destination_wind_seasons` (P9 — per-season wind profile, one row per season per destination). RLS enabled, public read. Written by `parse_p9` in the parser. 50 rows across 25 destinations. | ✅ Applied |
-| `038_create_kite_schools.sql` | Created `kite_schools` (P16 — Perplexity-sourced school lesson/amenity intel). Separate from `schools` (Google Places). RLS public read. 112 rows across 25 destinations. | ✅ Applied |
+| `037_destination_wind_seasons.sql` | Created `destination_wind_seasons` (P9 — per-season wind profile, one row per season per destination). RLS enabled, public read. Written by `parse_p9` in the parser. 48 rows across 25 destinations. | ✅ Applied |
+| `038_create_kite_schools.sql` | Created `kite_schools` (P16 — Perplexity-sourced school lesson/amenity intel). Separate from `schools` (Google Places). RLS public read. 113 rows across 25 destinations. | ✅ Applied |
 | `039_create_kite_accommodations.sql` | Created `kite_accommodations` (P17 — kite-community accommodation intel: proximity to launch, gear storage, kite packages). RLS public read. 141 rows across 25 destinations. | ✅ Applied |
-| `040_create_kite_gear_services.sql` | Created `kite_gear_services` (P18 — gear rental operators + repair shops per destination). `service_type` = 'rental'/'repair'. Includes `stranded_risk` (low/medium/high) at destination level. RLS public read. ~163 rows across 25 destinations. | ✅ Applied |
+| `040_create_kite_gear_services.sql` | Created `kite_gear_services` (P18 — gear rental operators + repair shops per destination). `service_type` = 'rental'/'repair'. Includes `stranded_risk` (low/medium/high) at destination level. RLS public read. 161 rows across 25 destinations. | ✅ Applied |
 
 **⚠️ Migrations NOT Applied:**
 - `supabase/migrations/099` (if it exists) — drops source columns. DO NOT APPLY.
@@ -2049,7 +2049,7 @@ All data is hardcoded placeholder. No Supabase queries from any jarvis component
 
 ## 6. DATA INGESTION STATE
 
-Data sourced from live DB query (2026-05-26T10:57:54).
+Data sourced from live DB query (2026-05-28T07:50:03.576008).
 
 ### Normalized Tables (core destination data)
 - **101 rows each** across all 10 normalized tables
@@ -2058,13 +2058,13 @@ Data sourced from live DB query (2026-05-26T10:57:54).
 - No duplicates — `COUNT(DISTINCT destination_id) = 101` confirmed
 
 ### social_intel_staging
-- **352 rows** (queried 2026-05-26T10:57:54)
+- **352 rows** (queried 2026-05-28T07:50:03.576008)
 - 0 pending rows remaining (pending_social_intel = 0)
 - Pre-dedup: 453 rows (doubled by ingesters running 2-3×)
 - By source: 413 google_places + 39 seabreeze + 1 reddit
 
 ### google_places_raw
-- **2,388 rows** confirmed (queried 2026-05-26T10:57:54)
+- **2,388 rows** confirmed (queried 2026-05-28T07:50:03.576008)
 - Data exists for all 11 categories across active destinations
 - Admin review queue: SocialIntelReviewQueue.tsx
 
@@ -2080,14 +2080,14 @@ Data sourced from live DB query (2026-05-26T10:57:54).
 - Status in staging: `approved` (auto-approved, confidence 9.0) — does not need admin queue review
 
 ### seabreeze_raw
-- **26 rows** (queried 2026-05-26T10:57:54)
+- **26 rows** (queried 2026-05-28T07:50:03.576008)
 - Staging rows in social_intel_staging sourced from seabreeze
 
 ### approved_social_intel
-- **300 rows** confirmed (queried 2026-05-26T10:57:54)
+- **300 rows** confirmed (queried 2026-05-28T07:50:03.576008)
 
 ### research_staging
-- **569 rows** (queried 2026-05-26T10:57:54)
+- **785 rows** (queried 2026-05-28T07:50:03.576008)
 - Populated by Perplexity collector scripts (v1–v4). Contains raw JSON responses for P7–P15.
 - P7–P13: collected by v3 collector. P14–P15: collected by v4 collector (active, in `scripts/data-collection/`)
 - All 25 active destinations × prompts P7–P15 parsed and written to production tables (completed 2026-05-25)
@@ -2103,13 +2103,13 @@ Data sourced from live DB query (2026-05-26T10:57:54).
 - `destination_editorial.scene_summary` + `proximity_reality` populated for all 25
 
 ### destination_wind_seasons
-- **50 rows** confirmed (2026-05-28)
+- **48 rows** confirmed (2026-05-28)
 - Populated by `kitevurse_perplexity_parser.py` parse_p9 (v5 collector run — migration 037)
 - One row per named wind season per destination (destinations with dual monsoon seasons get 2 rows)
 - Fields: season_name, months[], avg_wind_knots_low/high, wind_direction, shore_angle, rideable_days_per_week, kite_sizes_70kg, honest_take
 
 ### kite_schools
-- **112 rows** confirmed (2026-05-28)
+- **113 rows** confirmed (2026-05-28)
 - Populated by `kitevurse_perplexity_parser.py` parse_p16 (P16 Kite Schools prompt — migration 038)
 - Separate from the `schools` table (Google Places source). This table is Perplexity-sourced, focused on IKO cert, pricing, languages, lesson packages.
 
@@ -2119,15 +2119,15 @@ Data sourced from live DB query (2026-05-26T10:57:54).
 - Kite-community accommodation intel: which properties kiters use, proximity to launch, gear storage, kite packages.
 
 ### kite_gear_services
-- **~163 rows** confirmed (2026-05-28)
+- **161 rows** confirmed (2026-05-28)
 - Populated by `kitevurse_perplexity_parser.py` parse_p18 (P18 Gear & Repair prompt — migration 040)
 - One row per operator or repair shop. service_type = 'rental' or 'repair'. Includes destination-level stranded_risk.
 
 ### kite_spots
-- **117 rows** (queried 2026-05-26T10:57:54)
+- **117 rows** (queried 2026-05-28T07:50:03.576008)
 
 ### visa_requirements
-- **251 rows** (queried 2026-05-26T10:57:54)
+- **251 rows** (queried 2026-05-28T07:50:03.576008)
 
 ### sim_card_options
 - **0 rows** — not yet collected
@@ -2146,10 +2146,10 @@ Data sourced from live DB query (2026-05-26T10:57:54).
 - All 25 active destinations wired with airport_iata FK
 
 ### approval_queue
-- **6 rows** total; **4 pending** (queried 2026-05-26T10:57:54)
+- **6 rows** total; **4 pending** (queried 2026-05-28T07:50:03.576008)
 
 ### facebook_engagement_queue
-- **7 rows** (queried 2026-05-26T10:57:54)
+- **7 rows** (queried 2026-05-28T07:50:03.576008)
 
 ---
 
@@ -2218,7 +2218,7 @@ Fonts: `'Inter Tight', system-ui, sans-serif` (display/headings). `'JetBrains Mo
 
 7. **ingest_reddit_posts signature** — final signature is `(input_slug TEXT, posts JSONB)`. The old single-param pg_net version was superseded in migration 019.
 
-8. **approve_social_intel_row_v2 signature** — current is 3 params: `(p_id UUID, p_excluded_indices INT[] DEFAULT NULL, p_custom_venues JSONB DEFAULT NULL)`. The 2-param version was dropped in migration 032.
+8. **approve_social_intel_row_v2 signature** — current is 3 params: `(p_id UUID, p_excluded_indices INT[] DEFAULT NULL, p_custom_venues JSONB DEFAULT NULL)`. The 2-param version was dropped in migration 032 — do not revert to it.
 
 9. **Section ID** — `pack` not `packing`. This was a bug that was fixed.
 
@@ -2413,126 +2413,4 @@ This is the single source of truth for all KiteVurse context.
 
 You are the data collection engineer for KiteVurse.
 Scripts live in: scripts/data-collection/ (Python + PowerShell launchers).
-Shell: PowerShell. Key loading pattern: same as run_parser.ps1 (Credential Manager).
-
-Data source split (locked):
-- Google Places → all venue data (gyms, restaurants, accommodation, transport, etc.)
-- Perplexity P7–P15 → all context/narrative/kite-specific (safety, visa, wind, hubs, areas)
-
-Rules:
-- ⚠️ Ingestion uses DELETE + INSERT — do NOT build periodic refresh until this is replaced with merge logic.
-- All Perplexity prompts return pure JSON (structured output — eliminates 40% null rate).
-- Every response includes data_availability.complete for frontend display logic.
-- Never ask Perplexity to re-collect what Google Places already has.
-- Resume-safe: perplexity_parser_progress.json tracks completed destinations.
-- End every session with a HANDOFF block.
-```
-
----
-
-### 10E — Trip Engine / Edge Functions
-
-```
-At the start of every session, fetch and read:
-https://raw.githubusercontent.com/Kaivurse/kitevurse-context/main/CLAUDE-REFERENCE-FULL.md
-This is the single source of truth for all KiteVurse context.
-
-You are the trip engine engineer for KiteVurse.
-All Edge Functions live in supabase/functions/. AI engine: claude-sonnet-4-6.
-Output format: NDJSON stream — one line per section as calls complete.
-
-Rules:
-- Claude API NEVER generates factual data (airport codes, wind knots, hazards) — DB only.
-  All facts come from get_destination_detail_by_slug_v1 and get_schools_by_destination_v1.
-- Section ID is `pack` — NOT `packing`. This was a fixed bug — do not revert it.
-- SERVICE_ROLE_KEY env var name — NOT SUPABASE_SERVICE_ROLE_KEY (blocked prefix).
-- All Edge Functions deployed with --no-verify-jwt.
-- Voice rule: write like a real person. Contractions, simple words, honest about limitations.
-  See CLAUDE.md Voice & Authenticity section for the full anti-AI baseline.
-- End every session with a HANDOFF block.
-```
-
----
-
-### 10F — Admin & Review
-
-```
-At the start of every session, fetch and read:
-https://raw.githubusercontent.com/Kaivurse/kitevurse-context/main/CLAUDE-REFERENCE-FULL.md
-This is the single source of truth for all KiteVurse context.
-
-You are the admin and review systems engineer for KiteVurse.
-Admin UI lives at /admin (AdminReviewQueue + SocialIntelReviewQueue).
-DENNIS ops dashboard at /admin/jarvis (PIN: 2601, display name: DENNIS).
-
-Key RPCs: get_pending_social_intel_v1, approve_social_intel_row_v2 (3 params), reject_social_intel_row.
-approve_social_intel_row_v2 current signature: (p_id UUID, p_excluded_indices INT[] DEFAULT NULL, p_custom_venues JSONB DEFAULT NULL).
-The 2-param version was dropped in migration 032 — do not revert to it.
-
-Rules:
-- JARVIS dashboard data is all hardcoded placeholder — do not wire Supabase queries to it yet (Phase 5).
-- Admin review queue is the gate before any Google Places data hits production.
-- End every session with a HANDOFF block.
-```
-
----
-
-### 10G — DevOps / Infrastructure
-
-```
-At the start of every session, fetch and read:
-https://raw.githubusercontent.com/Kaivurse/kitevurse-context/main/CLAUDE-REFERENCE-FULL.md
-This is the single source of truth for all KiteVurse context.
-
-You are the DevOps and infrastructure engineer for KiteVurse.
-Shell: PowerShell (Windows 11). Repo: C:\Users\danwi\kite-explorer.
-Hosting target: Vercel. Supabase project: xthaiitjoccrrqivjlor.
-
-Key env vars:
-- Frontend: VITE_KITEVERSE_SUPABASE_URL + VITE_KITEVERSE_SUPABASE_ANON_KEY (active project)
-- Edge Functions: SERVICE_ROLE_KEY (NOT SUPABASE_SERVICE_ROLE_KEY — blocked prefix)
-- Legacy VITE_SUPABASE_* vars point to old project ouqqfpqsbaijbinpyiio — do NOT use for new work.
-
-Vercel deployment checklist (Phase 4):
-- vercel.json with SPA rewrite rules
-- Env vars set (VITE_KITEVERSE_* only)
-- Confirm correct project (xthaiitjoccrrqivjlor)
-- End-to-end test all 25 destination pages
-
-Rules:
-- All automation goes into files/scripts — never ask Dan to remember manual steps.
-- End every session with a HANDOFF block.
-```
-
----
-
-### 10H — Marketing / Community
-
-```
-At the start of every session, fetch and read:
-https://raw.githubusercontent.com/Kaivurse/kitevurse-context/main/CLAUDE-REFERENCE-FULL.md
-This is the single source of truth for all KiteVurse context.
-
-You are the marketing and community strategist for KiteVurse.
-KiteVurse is NOT a booking site or directory — it's the honest, AI-powered planning tool
-the kitesurfing community doesn't have yet. Be a kiter first, founder second.
-
-Voice rules (locked):
-- No AI-sounding prose: no "presents," "establishes," "ecosystem," "optimal," "facilitated."
-- Contractions, simple words, understatement, honest negatives.
-- First person: "I found," "in my experience," "what I noticed."
-- Drop links only when someone explicitly asked for recommendations.
-
-Facebook post rotation:
-- 2-3×/week: local knowledge ("Just back from Dakhla — thermals kick in around 1pm in December")
-- 1×/week: honest destination take
-- 1-2×/week: community question
-- 1-2×/month: KiteVurse soft mention (never cold-post "check out my platform")
-- 1-2×/month: trip plan share
-
-Revenue streams: Booking.com affiliate (4-6%), Skyscanner CPC, SafetyWing ($15-25/signup), KiteVurse Pro ($49/year — Month 9).
-
-Rules:
-- Never marketing language. Never "excited to share," "game changer," "revolutionary."
-- End every session with a HANDOFF block.
-```
+Shell: PowerShell. Key loading pattern: same as run
