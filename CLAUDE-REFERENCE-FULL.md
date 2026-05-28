@@ -1,6 +1,6 @@
 # CLAUDE-REFERENCE-FULL.md — KiteVurse Complete Technical Reference
 
-Generated: 2026-05-25 | Last updated: 2026-05-26 (nightly update — DB state queried 2026-05-26T10:57:54)  
+Generated: 2026-05-25 | Last updated: 2026-05-28 (manual update — new tables 037–040, v5 collector, P16–P18)  
 Source: schema_tables.json + all migration files + Edge Function source + frontend source  
 Do NOT use Notes/DBSCHEMA.md — it is a pre-normalization snapshot and is stale.
 
@@ -109,14 +109,20 @@ Not a booking site. Not a directory. The honest, AI-powered planning tool the ki
 
 ### PHASE 1 — Data Complete ✅
 
-**Complete as of May 26, 2026.**
+**Complete as of May 28, 2026 (extended — P16–P18 + new tables added).**
 
 All steps finished:
 - Perplexity P7–P15 collected (v4 collector) and parsed to production tables for all 25 destinations
+- Perplexity P16–P18 collected and parsed (v5 collector) — new tables kite_schools, kite_accommodations, kite_gear_services populated
+- P9 parser upgraded: now also writes to `destination_wind_seasons` (migration 037) in addition to `destination_conditions`
 - Google Places: 2,264 rows collected, admin review queue built and used, approved rows ingested
 - Admin Review Queue: SocialIntelReviewQueue.tsx + AdminReviewQueue.tsx built and live at `/admin/review`
 - Ingestion scripts: `scripts/data-collection/kitevurse_places_ingester.py` + `kitevurse_perplexity_parser.py` — complete, in repo
-- destination_areas: ~175 rows (P14). kite_hubs: ~147 rows (P15). destination_editorial updated for all 25.
+- destination_areas: ~177 rows (P14). kite_hubs: ~139 rows (P15). destination_editorial updated for all 25.
+- destination_wind_seasons: 50 rows (P9 — migration 037). kite_schools: 112 rows (P16 — migration 038). kite_accommodations: 141 rows (P17 — migration 039). kite_gear_services: ~163 rows (P18 — migration 040).
+- Collector upgraded to v5 (`kitevurse_perplexity_collector_v5.py`) — fixed prompts P7/P9/P12/P13 (dual numbers, zero tolerance, confirmed names, per-spot regulations)
+- `run_collector.ps1` added as Perplexity collector launcher (mirrors run_parser.ps1 pattern)
+- `STANDARDS.md` created at `scripts/data-collection/STANDARDS.md` — coding standards for all data-collection scripts
 - All data collection scripts moved into `scripts/data-collection/` in the kite-explorer repo
 
 **Data source split (locked):**
@@ -365,13 +371,19 @@ Likely scope:
 | Item | Status |
 |---|---|
 | Perplexity v4 collection (P7–P15, all 25 destinations) | ✅ Complete |
-| Perplexity parser (P7–P15 → production tables) | ✅ Complete |
+| Perplexity v5 collection (P16–P18, all 25 destinations) | ✅ Complete |
+| Perplexity parser (P7–P18 → production tables) | ✅ Complete |
 | Google Places data (2,388 rows in google_places_raw) | ✅ Collected |
 | Google Places admin review queue | ✅ Built + used |
 | Google Places ingestion (staging → production) | ✅ Complete (300 approved_social_intel rows) |
+| destination_wind_seasons (50 rows, P9 — migration 037) | ✅ Complete |
 | destination_areas (177 rows, P14) | ✅ Complete |
 | kite_hubs (139 rows, P15) | ✅ Complete |
+| kite_schools (112 rows, P16 — migration 038) | ✅ Complete |
+| kite_accommodations (141 rows, P17 — migration 039) | ✅ Complete |
+| kite_gear_services (~163 rows, P18 — migration 040) | ✅ Complete |
 | Data collection scripts in repo (`scripts/data-collection/`) | ✅ Complete |
+| run_collector.ps1 launcher + STANDARDS.md | ✅ Complete |
 | Nightly auto-update script (CLAUDE-REFERENCE-FULL.md) | ✅ Complete |
 | Public context mirror (kitevurse-context repo) | ✅ Complete |
 | DENNIS ops dashboard (`/admin/jarvis`) | ✅ Built (placeholder data) |
@@ -1231,7 +1243,124 @@ Row count: 139 rows (confirmed 2026-05-26).
 
 ---
 
-### 1I. Supporting Tables
+### 1I. Perplexity P16–P18 Tables (migrations 037–040)
+
+These four tables are populated by `kitevurse_perplexity_parser.py` after P9/P16/P17/P18 research runs using the v5 collector. All have RLS public read. All were populated for all 25 active destinations as of 2026-05-28.
+
+---
+
+**destination_wind_seasons** — Per-season wind profile per destination (P9 output) (50 rows)
+
+One row per wind season. Parser strategy: DELETE auto-generated rows (manually_verified=false) then INSERT fresh rows from P9 JSON. P9 also continues to update `destination_conditions` (the single-averaged profile is preserved for backwards compatibility).
+
+| Column | Type |
+|--------|------|
+| id | uuid PK |
+| destination_id | uuid FK → destinations |
+| season_name | text NOT NULL (e.g. "Kusi", "Trade Wind", "Summer") |
+| local_name | text (local name if one exists) |
+| months | smallint[] (e.g. {6,7,8,9,10}) |
+| avg_wind_knots_low | smallint |
+| avg_wind_knots_high | smallint |
+| wind_direction | text (compass e.g. "SE", "NE") |
+| wind_angle_degrees | smallint (0–359, meteorological FROM) |
+| shore_angle | text (e.g. "cross-onshore", "side-shore") |
+| rideable_days_per_week_low | smallint |
+| rideable_days_per_week_high | smallint |
+| kite_sizes_70kg | text[] (e.g. {"9m","11m","13m"}) |
+| chop | text (e.g. "low", "choppy") |
+| honest_take | text (1-2 sentence plain-language description) |
+| data_source | text (default 'perplexity') |
+| manually_verified | boolean (default false) |
+| parsed_at / needs_refresh_by | timestamptz / date |
+| created_at / updated_at | timestamptz |
+
+Row count: 50 rows (confirmed 2026-05-28).
+
+---
+
+**kite_schools** — Kite school lesson/amenity intel per destination (P16 output) (112 rows)
+
+One row per school. Separate from the `schools` table (which is Google Places sourced with a richer schema). This table is Perplexity-sourced with a focused schema for lesson/amenity comparison. Parser strategy: DELETE auto-generated rows (manually_verified=false) then INSERT fresh rows from P16 JSON.
+
+| Column | Type |
+|--------|------|
+| id | uuid PK |
+| destination_id | uuid FK → destinations |
+| school_name | text NOT NULL |
+| iko_certified | boolean (default false) |
+| price_per_hour_usd | numeric(8,2) |
+| equipment_included | boolean (default true) |
+| beginner_friendliness | smallint CHECK (1–5) |
+| website | text |
+| languages | text[] |
+| accommodation_packages | boolean (default false) |
+| lesson_packages | jsonb ({beginner, intermediate, advanced} text descriptions) |
+| data_source | text (default 'perplexity_sonar_pro') |
+| manually_verified | boolean (default false) |
+| parsed_data / parsed_at / needs_refresh_by | jsonb / timestamptz / date |
+| created_at / updated_at | timestamptz |
+
+Row count: 112 rows (confirmed 2026-05-28).
+
+---
+
+**kite_accommodations** — Kite-community accommodation intel per destination (P17 output) (141 rows)
+
+One row per property. Captures which properties kiters actually stay at, proximity to launch, gear storage, and kite package availability. Parser strategy: DELETE auto-generated rows then INSERT from P17 JSON.
+
+| Column | Type |
+|--------|------|
+| id | uuid PK |
+| destination_id | uuid FK → destinations |
+| property_name | text NOT NULL |
+| distance_to_launch_m | integer (metres from property to main kite launch) |
+| gear_storage | boolean (default false) |
+| community_favourite | boolean (default false — repeatedly cited by kiters in forums/groups) |
+| price_per_night_usd_low | integer (budget / cheapest room) |
+| price_per_night_usd_high | integer (best / most expensive room) |
+| kite_packages | boolean (default false — bundled lesson + stay deals) |
+| beach_access | boolean (default false — direct beach access from property) |
+| website | text |
+| data_source | text (default 'perplexity_sonar_pro') |
+| manually_verified | boolean (default false) |
+| parsed_data / parsed_at / needs_refresh_by | jsonb / timestamptz / date |
+| created_at / updated_at | timestamptz |
+
+Row count: 141 rows (confirmed 2026-05-28).
+
+---
+
+**kite_gear_services** — Gear rental operators and repair shops per destination (P18 output) (~163 rows)
+
+One row per operator/shop. `service_type` = 'rental' or 'repair'. Destination-level `stranded_risk` (low/medium/high) is stored on every row for that destination. Parser strategy: DELETE auto-generated rows then INSERT from P18 JSON.
+
+| Column | Type |
+|--------|------|
+| id | uuid PK |
+| destination_id | uuid FK → destinations |
+| operator_name | text NOT NULL |
+| service_type | text NOT NULL CHECK ('rental' / 'repair') |
+| brands | text[] (rental only — e.g. {'Duotone','Cabrinha'}) |
+| fleet_condition | text (rental only — 'excellent'/'good'/'fair'/'poor') |
+| foil_available | boolean (rental only — default false) |
+| price_per_day_usd | integer (rental only — all-in daily rate) |
+| repairs_offered | text[] (repair only — e.g. {'bladder','canopy','bar/lines','board'}) |
+| turnaround_days | integer (repair only — typical turnaround) |
+| bars_available | boolean (repair only — replacement bars/lines for sale) |
+| stranded_risk | text CHECK ('low'/'medium'/'high') — same value on all rows for a destination |
+| stranded_risk_notes | text |
+| website | text |
+| data_source | text (default 'perplexity_sonar_pro') |
+| manually_verified | boolean (default false) |
+| parsed_data / parsed_at / needs_refresh_by | jsonb / timestamptz / date |
+| created_at / updated_at | timestamptz |
+
+Row count: ~163 rows (confirmed 2026-05-28).
+
+---
+
+### 1J. Supporting Tables
 
 **destination_media** — Hero images and photos stored in Supabase Storage.
 Key columns: id, destination_id (text — FK joins via `d.destination_id` not `d.id`), image_url, is_hero, created_at.
@@ -1740,6 +1869,10 @@ Text priority: `your_edits` (Danny's edits) → `draft_text` (original Claude dr
 | `034_visa_requirements_add_destination_id.sql` | Added destination_id UUID FK (nullable) to visa_requirements. Added UNIQUE(destination_id, passport_country_code). | ✅ Applied |
 | `035_ingestion_column_fixes.sql` | Added data_source/is_active to kite_spots; is_active to transportation; data_source to destination_conditions; made visa_required nullable | ✅ Applied |
 | `036_destination_areas_kite_hubs.sql` | Created `destination_areas` (P14 — neighbourhood intel, one row per area) + `kite_hubs` (P15 — kite scene hubs, one row per hub). Added `areas_recommendation`, `scene_summary`, `proximity_reality` columns to `destination_editorial`. RLS public read on both new tables. Idempotent: DROP/CREATE policies, column fixups for reruns. | ✅ Applied |
+| `037_destination_wind_seasons.sql` | Created `destination_wind_seasons` (P9 — per-season wind profile, one row per season per destination). RLS enabled, public read. Written by `parse_p9` in the parser. 50 rows across 25 destinations. | ✅ Applied |
+| `038_create_kite_schools.sql` | Created `kite_schools` (P16 — Perplexity-sourced school lesson/amenity intel). Separate from `schools` (Google Places). RLS public read. 112 rows across 25 destinations. | ✅ Applied |
+| `039_create_kite_accommodations.sql` | Created `kite_accommodations` (P17 — kite-community accommodation intel: proximity to launch, gear storage, kite packages). RLS public read. 141 rows across 25 destinations. | ✅ Applied |
+| `040_create_kite_gear_services.sql` | Created `kite_gear_services` (P18 — gear rental operators + repair shops per destination). `service_type` = 'rental'/'repair'. Includes `stranded_risk` (low/medium/high) at destination level. RLS public read. ~163 rows across 25 destinations. | ✅ Applied |
 
 **⚠️ Migrations NOT Applied:**
 - `supabase/migrations/099` (if it exists) — drops source columns. DO NOT APPLY.
@@ -1969,6 +2102,27 @@ Data sourced from live DB query (2026-05-26T10:57:54).
 - Populated by `kitevurse_perplexity_parser.py` parse_p15 (2026-05-25)
 - `destination_editorial.scene_summary` + `proximity_reality` populated for all 25
 
+### destination_wind_seasons
+- **50 rows** confirmed (2026-05-28)
+- Populated by `kitevurse_perplexity_parser.py` parse_p9 (v5 collector run — migration 037)
+- One row per named wind season per destination (destinations with dual monsoon seasons get 2 rows)
+- Fields: season_name, months[], avg_wind_knots_low/high, wind_direction, shore_angle, rideable_days_per_week, kite_sizes_70kg, honest_take
+
+### kite_schools
+- **112 rows** confirmed (2026-05-28)
+- Populated by `kitevurse_perplexity_parser.py` parse_p16 (P16 Kite Schools prompt — migration 038)
+- Separate from the `schools` table (Google Places source). This table is Perplexity-sourced, focused on IKO cert, pricing, languages, lesson packages.
+
+### kite_accommodations
+- **141 rows** confirmed (2026-05-28)
+- Populated by `kitevurse_perplexity_parser.py` parse_p17 (P17 Kite Accommodations prompt — migration 039)
+- Kite-community accommodation intel: which properties kiters use, proximity to launch, gear storage, kite packages.
+
+### kite_gear_services
+- **~163 rows** confirmed (2026-05-28)
+- Populated by `kitevurse_perplexity_parser.py` parse_p18 (P18 Gear & Repair prompt — migration 040)
+- One row per operator or repair shop. service_type = 'rental' or 'repair'. Includes destination-level stranded_risk.
+
 ### kite_spots
 - **117 rows** (queried 2026-05-26T10:57:54)
 
@@ -2082,6 +2236,7 @@ All data collection scripts live in `scripts/data-collection/` within this repo 
 |--------|---------|
 | `run_ingester.ps1` | Loads service role key from Windows Credential Manager → runs `kitevurse_places_ingester.py` |
 | `run_parser.ps1` | Loads service role key from Windows Credential Manager → runs `kitevurse_perplexity_parser.py` |
+| `run_collector.ps1` | Loads Perplexity API key from Windows Credential Manager (`KiteVurse:PERPLEXITY_API_KEY`) + service role key → runs `kitevurse_perplexity_collector_v5.py`. Pass all CLI args through. |
 
 Key mechanism: both scripts read `Supabase CLI:supabase` from Windows Credential Manager, exchange it for the project service role key via Supabase Management API, set `$env:SUPABASE_SERVICE_ROLE_KEY_KV`, then `Set-Location $PSScriptRoot` before calling Python. Works from any working directory.
 
@@ -2091,27 +2246,36 @@ Key mechanism: both scripts read `Supabase CLI:supabase` from Windows Credential
 |--------|--------|---------|
 | `kitevurse_places_ingester.py` | ✅ Active | Moves approved Google Places rows from `google_places_raw` → production venue tables. Only processes combos in `approved_social_intel`. |
 | `kitevurse_perplexity_parser.py` | ✅ Active | Reads `research_staging` → writes P7–P15 to production tables. Resume-safe via `perplexity_parser_progress.json`. |
-| `kitevurse_perplexity_collector_v4.py` | ✅ Active (P14+P15) | Calls Perplexity API, writes to `research_staging`. P1–P13 disabled (data collected). ~50 calls for full P14+P15 run ≈ $0.10. |
+| `kitevurse_perplexity_collector_v5.py` | ✅ Active | Calls Perplexity API, writes to `research_staging`. Credentials from env vars (never hardcoded). Single PROMPTS dict with `enabled` boolean. P11, P14, P15 active by default. Resume-safe via `progress_v5.json`. |
+| `kitevurse_perplexity_collector_v4.py` | Retired | Replaced by v5. Had hardcoded credentials, bare relative path for OUTPUT_FOLDER, split PROMPTS/_DISABLED_PROMPTS dicts, and discarded staging insert return value. |
 | `kitevurse_perplexity_collector_v3.py` | Retired | P7–P13, v3 (improved JSON extraction) |
 | `kitevurse_perplexity_collector_v2.py` | Retired | P7–P13, v2 |
 | `kitevurse_perplexity_collector.py` | Retired | P1–P6, v1 |
 | `_fix_encoding.py` | One-time util | Replaced emoji with ASCII in parser.py — already applied |
 
-### Parser Prompt Map (current — P7–P15 all complete)
+### Parser Prompt Map (current — P7–P18 all complete)
 
 | Prompt | Name | Target Table(s) |
 |--------|------|-----------------|
 | P7 | Culture & Safety | `culture_safety` (UPSERT on destination_id) |
 | P8 | Visa Requirements | `visa_requirements` (DELETE+INSERT per passport) |
-| P9 | Wind & Water | `destination_conditions` (UPDATE) |
+| P9 | Wind & Water | `destination_conditions` (UPDATE) + `destination_wind_seasons` (DELETE+INSERT per season) |
 | P10 | Destination Profile | `destination_editorial` (UPDATE) |
 | P11 | Spot Geometry | `kite_spots` (DELETE+INSERT per spot) |
 | P12 | Regulations | `spot_regulations` (DELETE+INSERT, UNIQUE on destination_id) |
 | P13 | Logistics | `destination_kiter_logistics` (DELETE+INSERT, UNIQUE on destination_id) |
 | P14 | Neighborhood & Area Intel | `destination_areas` (DELETE+INSERT) + `destination_editorial.areas_recommendation` (UPDATE) |
 | P15 | Kite Hubs & Scene | `kite_hubs` (DELETE+INSERT) + `destination_editorial.scene_summary` + `proximity_reality` (UPDATE) |
+| P16 | Kite Schools | `kite_schools` (DELETE+INSERT, manually_verified=false rows only) |
+| P17 | Kite Accommodations | `kite_accommodations` (DELETE+INSERT, manually_verified=false rows only) |
+| P18 | Gear & Repair | `kite_gear_services` (DELETE+INSERT, manually_verified=false rows only) |
 
-Run from kite-explorer root: `.\scripts\data-collection\run_parser.ps1 --prompt 14 --dest dakhla-morocco`
+Run from kite-explorer root: `.\scripts\data-collection\run_parser.ps1 --prompt 16 --dest dakhla-morocco`
+
+### Collector Architecture (v5)
+All prompts live in a single PROMPTS dict with an `enabled` boolean. No _DISABLED_PROMPTS dict. Disabled prompts have `enabled: False` and are skipped automatically by the run loop. Every prompt entry declares `max_tokens` and `temperature` explicitly — no function defaults. All file paths are resolved relative to `Path(__file__).parent`. Credentials are loaded from env vars (`PERPLEXITY_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY_KV`, `SUPABASE_URL_KV`) with a hard `sys.exit(1)` at startup if any are missing. Staging insert return value is checked — a failed insert marks the call key in `failed_calls` so `--retry-failed` picks it up on the next run. A token proximity warning fires when response length exceeds 90% of `max_tokens × 3.5` chars. Coding standards for all data-collection scripts are documented in `scripts/data-collection/STANDARDS.md`.
+
+**v5 prompt inventory:** P7 (Culture & Safety), P8 (Visa), P9 (Wind & Water — now also writes destination_wind_seasons), P10 (Destination Profile), P11 (Spot Geometry), P12 (Regulations — fixed: per-spot format), P13 (Logistics — fixed: confirmed names), P14 (Neighborhood & Area Intel), P15 (Kite Hubs & Scene), P16 (Kite Schools → kite_schools), P17 (Kite Accommodations → kite_accommodations), P18 (Gear & Repair → kite_gear_services). P7/P9/P12/P13 were also fixed in v5 for dual numbers, zero tolerance, confirmed names, and per-spot regulations respectively.
 
 ---
 
