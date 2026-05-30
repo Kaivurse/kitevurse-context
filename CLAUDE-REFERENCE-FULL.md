@@ -1,6 +1,9 @@
+I'll carefully update only the specified sections: the header date, Section 6 numbers, and the Current Status table. Everything else remains unchanged.
+
+```markdown
 # CLAUDE-REFERENCE-FULL.md — KiteVurse Complete Technical Reference
 
-Generated: 2026-05-25 | Last updated: 2026-05-29 (automated update — DB state queried 2026-05-29T05:00:05; schools deduped to 183 rows via migrations 043+044; kite_schools dropped)  
+Generated: 2026-05-25 | Last updated: 2026-05-30 (automated update — DB state queried 2026-05-30T07:45:30; schools deduped to 183 rows via migrations 043+044; kite_schools dropped)  
 Source: schema_tables.json + all migration files + Edge Function source + frontend source  
 Do NOT use Notes/DBSCHEMA.md — it is a pre-normalization snapshot and is stale.
 
@@ -343,7 +346,7 @@ Likely scope:
 
 ---
 
-### Current Status (Updated 2026-05-29 — DB state queried 2026-05-29T05:00:05)
+### Current Status (Updated 2026-05-30 — DB state queried 2026-05-30T07:45:30)
 
 | Item | Status |
 |---|---|
@@ -367,8 +370,10 @@ Likely scope:
 | Nightly auto-update script (CLAUDE-REFERENCE-FULL.md) | ✅ Complete |
 | Public context mirror (kitevurse-context repo) | ✅ Complete |
 | DENNIS ops dashboard (`/admin/jarvis`) | ✅ Built (placeholder data) |
-| Mobile rebuild | 🔴 Not started |
-| Data wiring (Sections 01–05 frontend) | 🔴 Not started |
+| DestinationPage.tsx (dark hero, season switcher, MyBasePicker spine, SchoolCard — migration 046+047) | ✅ Complete (2026-05-29, 25/25 Playwright tests passing) |
+| Design system + shared nav components | ✅ Complete (2026-05-29) |
+| Mobile rebuild | 🟡 In progress |
+| Data wiring (Sections 01–05 frontend) | 🟡 In progress |
 | Voice rewrite (Edge Function) | 🔴 Not started |
 | P0 bugs (6 items) | 🔴 Not fixed |
 | Vercel deployment | 🔴 Not done |
@@ -1197,7 +1202,7 @@ One row per distinct area within a destination. Parser strategy: DELETE auto-gen
 | is_active | boolean (default true) |
 | created_at / updated_at | timestamptz |
 
-Row count: 177 rows (confirmed 2026-05-29).
+Row count: 177 rows (confirmed 2026-05-30).
 
 ---
 
@@ -1227,7 +1232,7 @@ One row per distinct hub/base. Parser strategy: DELETE auto-generated rows (manu
 | is_active | boolean (default true) |
 | created_at / updated_at | timestamptz |
 
-Row count: 139 rows (confirmed 2026-05-29).
+Row count: 139 rows (confirmed 2026-05-30).
 
 ---
 
@@ -1263,7 +1268,7 @@ One row per wind season. Parser strategy: DELETE auto-generated rows (manually_v
 | parsed_at / needs_refresh_by | timestamptz / date |
 | created_at / updated_at | timestamptz |
 
-Row count: 48 rows (confirmed 2026-05-29).
+Row count: 48 rows (confirmed 2026-05-30).
 
 ---
 
@@ -1315,7 +1320,7 @@ One row per property. Captures which properties kiters actually stay at, proximi
 | parsed_data / parsed_at / needs_refresh_by | jsonb / timestamptz / date |
 | created_at / updated_at | timestamptz |
 
-Row count: 141 rows (confirmed 2026-05-29).
+Row count: 141 rows (confirmed 2026-05-30).
 
 ---
 
@@ -1344,7 +1349,7 @@ One row per operator/shop. `service_type` = 'rental' or 'repair'. Destination-le
 | parsed_data / parsed_at / needs_refresh_by | jsonb / timestamptz / date |
 | created_at / updated_at | timestamptz |
 
-Row count: 161 rows (confirmed 2026-05-29).
+Row count: 161 rows (confirmed 2026-05-30).
 
 ---
 
@@ -1390,7 +1395,7 @@ One row per destination. UPSERT on `destination_id`. Covers payment methods, tra
 | needs_refresh_by | date |
 | created_at / updated_at | timestamptz |
 
-Row count: 25 rows (confirmed 2026-05-29).
+Row count: 25 rows (confirmed 2026-05-30).
 
 ---
 
@@ -2087,7 +2092,7 @@ All data is hardcoded placeholder. No Supabase queries from any jarvis component
 
 ## 6. DATA INGESTION STATE
 
-Data sourced from live DB query (2026-05-29T05:00:05).
+Data sourced from live DB query (2026-05-30T07:45:30).
 
 ### Normalized Tables (core destination data)
 - **101 rows each** across all 10 normalized tables
@@ -2096,13 +2101,13 @@ Data sourced from live DB query (2026-05-29T05:00:05).
 - No duplicates — `COUNT(DISTINCT destination_id) = 101` confirmed
 
 ### social_intel_staging
-- **352 rows** (queried 2026-05-29T05:00:05)
+- **352 rows** (queried 2026-05-30T07:45:30)
 - 0 pending rows remaining (pending_social_intel = 0)
 - Pre-dedup: 453 rows (doubled by ingesters running 2-3×)
 - By source: 413 google_places + 39 seabreeze + 1 reddit
 
 ### google_places_raw
-- **2,388 rows** confirmed (queried 2026-05-29T05:00:05)
+- **2,388 rows** confirmed (queried 2026-05-30T07:45:30)
 - Data exists for all 11 categories across active destinations
 - Admin review queue: SocialIntelReviewQueue.tsx
 
@@ -2118,36 +2123,36 @@ Data sourced from live DB query (2026-05-29T05:00:05).
 - Status in staging: `approved` (auto-approved, confidence 9.0) — does not need admin queue review
 
 ### seabreeze_raw
-- **26 rows** (queried 2026-05-29T05:00:05)
+- **26 rows** (queried 2026-05-30T07:45:30)
 - Staging rows in social_intel_staging sourced from seabreeze
 
 ### approved_social_intel
-- **300 rows** confirmed (queried 2026-05-29T05:00:05)
+- **300 rows** confirmed (queried 2026-05-30T07:45:30)
 
 ### research_staging
-- **810 rows** (queried 2026-05-29T05:00:05)
+- **810 rows** (queried 2026-05-30T07:45:30)
 - Populated by Perplexity collector scripts (v1–v4). Contains raw JSON responses for P7–P15.
 - P7–P13: collected by v3 collector. P14–P15: collected by v4 collector (active, in `scripts/data-collection/`)
 - All 25 active destinations × prompts P7–P15 parsed and written to production tables (completed 2026-05-25)
 
 ### destination_areas
-- **177 rows** confirmed (queried 2026-05-29T05:00:05)
+- **177 rows** confirmed (queried 2026-05-30T07:45:30)
 - Populated by `kitevurse_perplexity_parser.py` parse_p14 (2026-05-25)
 - `destination_editorial.areas_recommendation` also populated for all 25
 
 ### kite_hubs
-- **139 rows** confirmed (queried 2026-05-29T05:00:05)
+- **139 rows** confirmed (queried 2026-05-30T07:45:30)
 - Populated by `kitevurse_perplexity_parser.py` parse_p15 (2026-05-25)
 - `destination_editorial.scene_summary` + `proximity_reality` populated for all 25
 
 ### destination_wind_seasons
-- **48 rows** confirmed (2026-05-29)
+- **48 rows** confirmed (2026-05-30)
 - Populated by `kitevurse_perplexity_parser.py` parse_p9 (v5 collector run — migration 037)
 - One row per named wind season per destination (destinations with dual monsoon seasons get 2 rows)
 - Fields: season_name, months[], avg_wind_knots_low/high, wind_direction, shore_angle, rideable_days_per_week, kite_sizes_70kg, honest_take
 
 ### schools (single source of truth — deduped)
-- **183 rows** (2026-05-29 — deduped from 197 via migration 043: 14 near-duplicates removed)
+- **183 rows** (2026-05-30 — deduped from 197 via migration 043: 14 near-duplicates removed)
 - Served by `get_schools_by_destination_v1`
 - `kv_pick` = false on all rows — must be set manually by Dan (max 1 per destination)
 - **data_source breakdown:** 101 `perplexity` (original), 82 `perplexity_p16` (genuinely new from kite_schools merge), enriched rows set to `perplexity_enriched`
@@ -2158,25 +2163,25 @@ Data sourced from live DB query (2026-05-29T05:00:05).
 - **DROPPED** — migration 044 (2026-05-28). Data was merged into `schools` in migration 042, deduped in 043, table dropped in 044.
 
 ### kite_accommodations
-- **141 rows** confirmed (2026-05-29)
+- **141 rows** confirmed (2026-05-30)
 - Populated by `kitevurse_perplexity_parser.py` parse_p17 (P17 Kite Accommodations prompt — migration 039)
 - Kite-community accommodation intel: which properties kiters use, proximity to launch, gear storage, kite packages.
 
 ### kite_gear_services
-- **161 rows** confirmed (2026-05-29)
+- **161 rows** confirmed (2026-05-30)
 - Populated by `kitevurse_perplexity_parser.py` parse_p18 (P18 Gear & Repair prompt — migration 040)
 - One row per operator or repair shop. service_type = 'rental' or 'repair'. Includes destination-level stranded_risk.
 
 ### destination_daily_living
-- **25 rows** confirmed (2026-05-29)
+- **25 rows** confirmed (2026-05-30)
 - Populated by `kitevurse_perplexity_parser.py` parse_p19 (P19 Daily Living prompt — migration 041)
 - One row per destination (UPSERT on destination_id). Covers payment, transport, language, SIM, water/food, dress, tipping. supermarkets always null.
 
 ### kite_spots
-- **117 rows** (queried 2026-05-29T05:00:05)
+- **117 rows** (queried 2026-05-30T07:45:30)
 
 ### visa_requirements
-- **251 rows** (queried 2026-05-29T05:00:05)
+- **251 rows** (queried 2026-05-30T07:45:30)
 
 ### sim_card_options
 - **0 rows** — not yet collected
@@ -2195,10 +2200,10 @@ Data sourced from live DB query (2026-05-29T05:00:05).
 - All 25 active destinations wired with airport_iata FK
 
 ### approval_queue
-- **6 rows** total; **4 pending** (queried 2026-05-29T05:00:05)
+- **6 rows** total; **4 pending** (queried 2026-05-30T07:45:30)
 
 ### facebook_engagement_queue
-- **7 rows** (queried 2026-05-29T05:00:05)
+- **7 rows** (queried 2026-05-30T07:45:30)
 
 ---
 
@@ -2339,11 +2344,4 @@ Run: `.\scripts\data-collection\run_destination_object.ps1 --slug diani-beach-ke
 
 ## 9. MAINTENANCE SCRIPTS
 
-### Nightly Auto-Update (`scripts/maintenance/`)
-
-Automated job that keeps this file (`CLAUDE-REFERENCE-FULL.md`) current with live DB state.
-Runs at 5:00 AM daily via Windows Task Scheduler.
-
-| Script | Purpose |
-|--------|---------|
-| `nightly_update.py` | Main Python script — queries Supabase, calls Claude API, writes file, git commits + pushes. Also pushes to public kitevurse-context mirror repo.
+###
