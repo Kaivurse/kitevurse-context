@@ -1,8 +1,7 @@
-```markdown
 # CLAUDE-REFERENCE-FULL.md — KiteVurse Complete Technical Reference
 
-Generated: 2026-05-25 | Last updated: 2026-06-02 (automated update — DB state queried 2026-06-02T05:00:05; kite_hubs P20 row field extraction complete — 139 hubs with 17 discrete fields populated via migration 048)  
-Source: schema_tables.json + all migration files + Edge Function source + frontend source  
+Generated: 2026-05-25 | Last updated: 2026-06-03 (Phase 2 frontend redesign underway — design system, destination page partial impl, live audit bugs, new tables 037-044, branch update)
+Source: schema_tables.json + all migration files + Edge Function source + frontend source + live browser audit
 Do NOT use Notes/DBSCHEMA.md — it is a pre-normalization snapshot and is stale.
 
 ---
@@ -31,11 +30,12 @@ If a session ends without a commit, state the uncommitted files explicitly.
 
 ### Non-negotiable session rules
 - **One task per session.** No sprawl.
-- **Every session needs tangible output** — something Dan can click, test, or see. Backend-only is acceptable only if a visible result is impossible.
+- **Every session needs tangible output** — something Dan can click, test, or see.
 - **Always end with a commit** unless Dan explicitly says not to.
-- **Never ask questions that are already answered** in this file, CLAUDE.md, or earlier in the conversation.
-- **When Dan is in flow, keep going.** Do not interrupt with check-ins or confirmation requests.
-- **Never give Dan a list of things to remember.** If something needs to happen, bake it into a file, script, or automated process.
+- **Never ask questions already answered** in this file or earlier in the conversation.
+- **When Dan is in flow, keep going.** Do not interrupt with check-ins.
+- **Never give Dan a list of things to remember.** Bake it into files, scripts, or automated processes.
+- **Verify first, execute second, test third** — always read this file before writing any SQL or referencing table/column names.
 
 ---
 
@@ -44,38 +44,24 @@ If a session ends without a commit, state the uncommitted files explicitly.
 ### How Dan works
 - Best hours: 7am–12pm. Schedule hard decisions and complex sessions here.
 - Carries context between sessions mentally — arrives knowing what to do next.
-- Needs tangible output every session. Something visible to touch, click, or test. Backend-only sessions feel incomplete and kill momentum.
+- Needs tangible output every session. Something visible to touch, click, or test.
 - Runs on dopamine from visible progress. A working page beats 500 rows in a database every time.
 
 ### ADHD compensations (non-negotiable)
-- Never give Dan a list of things to remember. Bake everything into files, scripts, and automated processes instead.
-- Never question work Dan says is complete without a specific technical reason. Trust his assessment first.
-- Search conversation history before asking any question. If the answer exists, use it.
+- Never give Dan a list of things to remember. Bake everything into files, scripts, and automated processes.
+- Never question work Dan says is complete without a specific technical reason.
+- Search conversation history before asking any question.
 - One task per session. No sprawl.
-- When Dan is in flow, do not interrupt with questions. Keep going.
+- When Dan is in flow, do not interrupt. Keep going.
 
 ### Strengths to leverage
-- Exceptional data analysis skills — he spots relationships between data sets that others miss.
+- Exceptional data analysis skills — spots relationships between data sets others miss.
 - Systems integration mindset — thinks in connections, not features.
-- Creative problem-solver under pressure — stays calm, evaluates, iterates, knows when to cut losses.
-
-### What derails Dan
-- Claude asking questions it already knows the answers to.
-- Claude casting doubt on completed work.
-- Sessions that end without something touchable.
-- Manual maintenance tasks (he will forget them — automate everything).
-
-### The goal
-Get Dan to flow state as fast as possible and keep him there.
-Every system, prompt, and process should serve that goal.
+- Creative problem-solver under pressure.
 
 ---
 
 ## PHASE PLAN & ROADMAP
-
-*Merged from KiteVurse_Master_Roadmap_v2.md (May 24, 2026). Current Status updated May 26, 2026 to reflect Phase 1 complete, Phase 2 starting.*
-
----
 
 ### What KiteVurse Is
 
@@ -83,312 +69,445 @@ Trip advice from the most well-traveled kiter you know — who tells you the tru
 
 Not a booking site. Not a directory. The honest, AI-powered planning tool the kitesurfing community doesn't have yet.
 
+Core value proposition: 343 real data points per destination, across 21 tables. Structured data, not AI hallucination.
+
 ---
 
 ### Business Model (Locked)
 
 | Revenue Stream | Mechanic | Timeline |
 |---|---|---|
-| Booking.com affiliate | 4–6% on accommodation referrals | Live at launch |
-| Skyscanner CPC | Cost-per-click on flight searches | Live at launch |
-| SafetyWing referral | $15–25 per signup | Live at launch |
+| Booking.com affiliate | 4–6% on accommodation referrals | Post-launch (needs traffic first — apply after 2-3 months live) |
+| Skyscanner CPC | Cost-per-click on flight searches | Post-launch |
+| SafetyWing referral | $15–25 per signup | Post-launch |
 | **KiteVurse Pro** | **$49/year** | **Month 9** |
+
+**Affiliate status (June 2026):** No affiliates applied yet. No social following yet. Must build audience first via share mechanic — then apply. Do not apply early: rejected applications burn goodwill.
 
 ---
 
 ### The Five Phases
 
-| Phase | Focus | Timeline | Status |
-|---|---|---|---|
-| **1 — Data Complete** | Finish collection, build review queue, ingest to production | Now → ~June 7 | ✅ Complete |
-| **2 — Frontend Integration** | Wire new data into UI, mobile-first rebuild, fix all known bugs | June → mid-July | 🟡 Starting |
-| **3 — Trip Engine Upgrade** | Smarter planner using real data, honest voice, new inputs | July | 🔴 Not started |
-| **4 — Soft Launch + Community** | Vercel deploy, Facebook engagement, real users | August | 🔴 Not started |
-| **5 — Agents + Pro + Scale** | Agentic system, KiteVurse Pro, expand to 76 destinations | Sept → Nov | 🔴 Not started |
+| Phase | Focus | Status |
+|---|---|---|
+| **1 — Data Complete** | Collection, review queue, ingestion to production | ✅ Complete |
+| **2 — Frontend Redesign** | Full UI rebuild — dark editorial design system, all pages rebuilt | 🟡 In Progress (destination page partial) |
+| **3 — Trip Engine Upgrade** | 3-call Edge Function, new inputs, streaming output | 🔴 Not started |
+| **4 — Soft Launch + Community** | Vercel deploy, Facebook engagement, real users | 🔴 Not started |
+| **5 — Agents + Pro + Scale** | Agentic system, KiteVurse Pro, expand to 76 destinations | 🔴 Not started |
 
 ---
 
-### PHASE 1 — Data Complete ✅
+### PHASE 2 — Frontend Redesign 🟡
 
-**Complete as of May 28, 2026 (extended — P16–P19 + new tables added).**
+#### What Phase 2 Is
 
-All steps finished:
-- Perplexity P7–P15 collected (v4 collector) and parsed to production tables for all 25 destinations
-- Perplexity P16–P19 collected and parsed (v5 collector) — new tables kite_schools, kite_accommodations, kite_gear_services, destination_daily_living populated
-- P9 parser upgraded: now also writes to `destination_wind_seasons` (migration 037) in addition to `destination_conditions`
-- Google Places: 2,264 rows collected, admin review queue built and used, approved rows ingested
-- Admin Review Queue: SocialIntelReviewQueue.tsx + AdminReviewQueue.tsx built and live at `/admin/review`
-- Ingestion scripts: `scripts/data-collection/kitevurse_places_ingester.py` + `kitevurse_perplexity_parser.py` — complete, in repo
-- destination_areas: ~177 rows (P14). kite_hubs: ~139 rows (P15). destination_editorial updated for all 25.
-- destination_wind_seasons: 50 rows (P9 — migration 037). kite_schools: 112 rows (P16 — migration 038). kite_accommodations: 141 rows (P17 — migration 039). kite_gear_services: ~163 rows (P18 — migration 040). destination_daily_living: 25 rows (P19 — migration 041).
-- Collector upgraded to v5 (`kitevurse_perplexity_collector_v5.py`) — fixed prompts P7/P9/P12/P13 (dual numbers, zero tolerance, confirmed names, per-spot regulations)
-- `run_collector.ps1` added as Perplexity collector launcher (mirrors run_parser.ps1 pattern)
-- `STANDARDS.md` created at `scripts/data-collection/STANDARDS.md` — coding standards for all data-collection scripts
-- All data collection scripts moved into `scripts/data-collection/` in the kite-explorer repo
+Complete replacement of every page users see. The backend (Supabase DB, Edge Functions, RPCs, data collection scripts) is **untouched**. Phase 2 is pure frontend.
 
-**Data source split (locked):**
-- Google Places → all venue data (gyms, restaurants, massage, accommodation, transport, nightlife, yoga, pharmacies, gear)
-- Perplexity P7–P15 → all context/narrative/kite-specific (safety, visa, wind, spot geometry, regulations, logistics, areas, hubs)
+**Active branch:** `feat/phase2-redesign`
+**Dev server:** `localhost:8080` (`npm run dev`)
+**Reference prototype:** `kitevurse-prototype.html` (Dan has locally — definitive visual reference)
 
-**⚠️ Ingestion uses DELETE + INSERT.** Do not build periodic refresh until this is replaced with merge logic — it will overwrite manually curated data.
+#### Architecture decisions (locked for Phase 2)
 
----
+- **DB vs API split is architectural law.** DB stores destination facts (wind, water, hazards, budgets, airport codes). Claude API generates personalized dynamic content (visa narrative, lifestyle narrative, verdict). Claude API must never generate factual DB fields.
+- **RPC-first.** Normalized tables (destination_conditions etc.) require SECURITY DEFINER RPCs. Supplementary tables (destination_wind_seasons, destination_areas, kite_hubs etc.) have public read RLS and query directly.
+- **TanStack Query v5 for all data.** No raw useEffect + useState for async data.
+- **vaul for all bottom sheets.** No custom sheet components.
+- **sonner for all toasts.** No Radix Toast or custom toasts.
+- **Schools use get_schools_by_destination_v1 RPC only.** Never query schools table directly.
+- **kite_schools table is DROPPED** (migration 044). `schools` is the single source of truth (183 rows).
+- **Visa data from visa_requirements table only.** Never from AI, never from destination_daily_living.
+- **Save/share conversion event:** "Save this plan" is the primary conversion. Save flow email entry = email capture + lead + conversion, in one action. Magic-link auth (Supabase signInWithOtp) — profile page at `/profile`.
 
-### PHASE 2 — Frontend Integration 🟡
+#### Phase 2 implementation status (as of June 3, 2026)
 
-**This is the phase we're starting. It's the longest and most important before launch.**
+| Page / Feature | Status | Notes |
+|---|---|---|
+| Design system (Tailwind config, tokens, fonts) | 🟡 Partially implemented | Tokens in tailwind.config.ts; mobile stats band fix committed 2026-06-02 |
+| Explorer page | 🔴 Not yet rebuilt | Old Explore.tsx still in place |
+| Destination page — hero | 🟡 Partial | Single-column layout; mobile stats band horizontal scroll strip; mobile Plan My Trip CTA added above Wind Season |
+| Destination page — wind season | 🟡 Working | Tabs work, rideable days text-only (no dots yet), wind bar present |
+| Destination page — My Base | 🟡 Working | 3 tabs render (4th missing), single-column layout (two-column grid bug fixed 2026-06-02), SOCIAL/EVENING open by default |
+| Destination page — mobile | 🟡 Partial | Device frame renders, bottom tab bar renders, mobile CTA inserted; no hero image yet |
+| Trip plan intake | 🔴 Not yet built | Old TripPlannerModal still in place |
+| Trip plan output | 🔴 Not yet built | Old TripPlanOutput still in place |
+| Authentication (magic link) | 🔴 Not built | Migration 045 saved_trips not yet run |
+| Profile page | 🔴 Not built | |
+| Shared view | 🔴 Not built | |
 
-Goal: All the new data we collected gets surfaced on the site. Site works on mobile. All known bugs fixed.
+#### Known destination page bugs (from live review June 2, 2026)
 
-#### 2A — Mobile-First Rebuild
+Full requirements: see `DESTINATION-PAGE-REQUIREMENTS.md` in the repo root (to be added by Dan after this session).
 
-Mobile was never properly addressed. It's a standing gap on every page.
+**Critical bugs:**
+1. ~~Stats band class `hidden lg:block` — Stats only show at 1280px+. Mobile and tablet show no stats.~~ **Fixed 2026-06-02** (horizontal scroll strip on mobile/tablet)
+2. ~~Plan My Trip CTA only at offsetTop 4205 in a 4389px page — no hero CTA on mobile.~~ **Fixed 2026-06-02** (mobile CTA inserted above Wind Season section)
+3. "The Catch" warning completely absent from DOM (`hasCatchText: false`).
+4. ~~Wind Season + My Base in side-by-side two-column grid — when My Base spine grows tall, left column becomes empty void.~~ **Fixed 2026-06-02** (single-column layout)
+5. ~~WIND RELIABILITY stat shows wind speed "18-24 KT" — wrong. Should show reliability score /100.~~ **Fixed 2026-06-02** (now shows wind_reliability/100)
+6. ~~~400px empty white space below invest footer.~~ **Fixed 2026-06-02** (grid removed)
+7. No hero image (placeholder only).
 
-Every Claude Code prompt from here forward includes mobile responsiveness as a requirement. Not optional. Not an afterthought. Primary viewports to test: iPhone SE (375px) and iPhone 14 (390px).
+**Priority fix order:** Bug 3 (The Catch) next. Then hero H1 + CTA. Then progressive disclosure. Then mobile breakpoints. Then animations.
 
-**Known mobile bugs to fix:**
-- BEST FOR / SKIP IF / WATCH OUT illegible on mobile (DestinationDetail hero)
-- 6-stat hero band squashes on mobile
-- These two ship together as one Claude Code session
+#### New tables in Phase 2 (supplementary, public read RLS)
 
-#### 2B — Data Wiring: Destination Detail Sections
+These tables are queried directly from frontend (no RPC needed):
 
-Wire approved, ingested data into frontend sections that are currently empty or placeholder.
+**destination_wind_seasons** (migration 037) — per-season wind data replacing the old single-row conditions approach
 
-| Section | Data Source | Current State | What Needs Wiring |
-|---|---|---|---|
-| 01 Conditions | Perplexity P9 (wind/water) | Placeholder / static | Seasonal wind table, kite size guide, water temp |
-| 02 Stay & Ride | Google Places (accommodation) | Partial | Real venue cards with ratings, hours, Google Maps links |
-| 03 No Wind | Google Places (gyms/yoga/massage/coworking) + Perplexity P7 | Partial | Venue cards per category, sparse data fallback |
-| 04 Getting There | Perplexity P13 (logistics) | Known bugs | Airlines, customs tips, gear advice |
-| 05 Daily Life | Google Places (restaurants/markets/pharmacies) + Perplexity P7 (safety/culture) | Partial | Venues, scam warnings, culture notes |
+| Column | Type |
+|---|---|
+| id | uuid PK |
+| destination_id | uuid FK → destinations |
+| season_name | text (e.g. "KUZI", "KASKAZI") |
+| months | smallint[] (e.g. [6,7,8,9]) |
+| avg_wind_knots_low | smallint |
+| avg_wind_knots_high | smallint |
+| wind_direction | text |
+| wind_angle_degrees | smallint |
+| shore_angle | text (e.g. "side-shore", "cross-onshore") |
+| rideable_days_per_week_low | smallint |
+| rideable_days_per_week_high | smallint |
+| kite_sizes_70kg | text[] (e.g. ["9m","11m","13m"]) |
+| chop | text |
+| honest_take | text |
+| is_active | boolean |
+| created_at / updated_at | timestamptz |
 
-**Sparse data display rules (locked):**
-- `data_availability.complete = true` → Show full section
-- `data_availability.complete = false` + some data → Single "Local Resources" card: *"Limited formal infrastructure — here's what's available"*
-- `data_availability.complete = false` + nothing found → 2-sentence Reality Check card: *"No formal yoga or gyms here. This is a pure kite destination."*
-- Never show empty cards. Absence of data is honest.
+RLS: Public read. Query: `supabase.from('destination_wind_seasons').select('*').eq('destination_id', id).eq('is_active', true)`
 
-#### 2C — Voice Update: Rewrite All AI-Generated Content
+**kite_accommodations** — accommodation options near kite spots
 
-**The problem:** Current trip plan output sounds like AI — overcorrected, constructed, too precise.
+Key columns: destination_id FK, name, area_name, distance_to_launch_m, price_per_night_usd_low/high, gear_storage boolean, kite_packages boolean, community_favourite boolean, website, is_active.
 
-**The fix:** Audit every Claude API prompt in the Edge Function (`generate-trip-plan`) and rewrite the system prompt and call-level instructions to enforce human voice.
+**kite_gear_services** — gear rental and services
 
-Claude Code Starting Prompt:
+Key columns: destination_id FK, service_type (rental/repair/storage), name, price_per_day_usd, stranded_risk text (LOW/MEDIUM/HIGH), is_active.
+
+**destination_daily_living** — daily logistics and life
+
+Key columns: destination_id FK, transport_primary, transport_price_range, transport_negotiate boolean, ride_app_available boolean, payment_app_name, payment_app_tourist_ok boolean, usd_accepted boolean, tap_water_safe boolean, sim_worth_it boolean, sim_carrier, sim_where_to_buy, english_sufficient boolean, english_notes, beach_dress, offbeach_dress, tip_restaurant_pct, bargaining boolean, is_active.
+
+**saved_trips** (migration 045 — NOT YET APPLIED) — user saved trip plans
+
+```sql
+CREATE TABLE saved_trips (
+  id                  uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id             uuid REFERENCES auth.users(id) ON DELETE CASCADE,
+  destination_id      uuid REFERENCES destinations(id),
+  destination_slug    text NOT NULL,
+  destination_name    text NOT NULL,
+  nationality         text,
+  arrival_date        date,
+  departure_date      date,
+  group_type          text,
+  skill_level         text,
+  weight_bracket      text,
+  gear_situation      text,
+  budget_level        text,
+  verdict             text CHECK (verdict IN ('GO', 'EYES_OPEN', 'WAIT')),
+  share_token         text UNIQUE DEFAULT encode(gen_random_bytes(12), 'base64url'),
+  created_at          timestamptz DEFAULT now()
+);
 ```
-Audit and rewrite the voice/tone of all Claude API calls in the
-generate-trip-plan Edge Function.
 
-Location: supabase/functions/generate-trip-plan/index.ts
+Migration 045 must be run before auth/save feature can be built.
 
-For EVERY call (~10-11 parallel calls), add or update the system prompt:
+#### Phase 2 — Edge Function update (NOT YET DONE)
 
-"Write like a real person. Use contractions. Prefer simple words.
-Understate rather than oversell. If you'd never say it conversationally,
-remove it. Avoid: 'presents,' 'establishes,' 'ecosystem,' 'optimal,'
-'aforementioned,' 'facilitated,' 'leverages.'
-Be honest about limitations. Specific details beat vague praise."
+The current `generate-trip-plan` Edge Function makes 10-11 Claude API calls. Phase 3 will rebuild it to 3 targeted calls:
+
+| Call | ID | Tokens | Content |
+|---|---|---|---|
+| 1 | `verdict` | 400 | GO/EYES_OPEN/WAIT headline + 3 reasons |
+| 2 | `on_the_water_narrative` | 350 | 1–2 sentence water conditions framing |
+| 3 | `lifestyle_narrative` | 400 | Group-conditional lifestyle narrative |
+
+All 3 fire in parallel. Returns NDJSON. Frontend renders DB data immediately; AI narrative hydrates when it lands. **Do not rebuild the Edge Function until the output page is designed and the intake reorder is implemented.**
+
+---
+
+## DESIGN SYSTEM (Phase 2)
+
+This is the locked design system for all Phase 2 pages. Claude Code must read this section before touching any UI component.
+
+### Colors (tailwind.config.ts)
+
+```typescript
+colors: {
+  page:          '#f6f4ef',    // page background (warm off-white)
+  dark:          '#0a0e14',    // dark backgrounds, nav, verdict zone
+  accent:        '#2DABE5',    // primary blue
+  'accent-deep': '#006194',    // deeper blue — all CTAs, active states
+  ink:           '#0a0e14',    // primary text on light bg
+  muted:         '#6b7a8d',    // secondary text
+  label:         '#54606c',    // label text
+  inverted:      '#e8eaed',    // text on dark backgrounds
+  green:         '#7ed3a2',    // GO verdict, positive signals
+  amber:         '#d99a3a',    // EYES_OPEN verdict, warnings
+  'bd-light':    'rgba(10,14,20,0.09)',    // borders on light bg
+  'bd-dark':     'rgba(255,255,255,0.08)', // borders on dark bg
+}
+```
+
+### Typography
+
+```html
+<!-- index.html -->
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+```
+
+```typescript
+// tailwind.config.ts
+fontFamily: {
+  display: ["'Inter Tight'", 'system-ui', 'sans-serif'],
+  mono:    ["'JetBrains Mono'", "'Courier New'", 'monospace'],
+}
+```
+
+**`font-display` (Inter Tight):** All headings, body text, buttons, option labels.
+**`font-mono` (JetBrains Mono):** ALL labels, eyebrows, data values, chips, stats, nav labels, section numbers. Anywhere a number, tag, short code, or monospace label appears.
+
+### Breakpoints
+
+| Name | Width | Tailwind | Layout |
+|---|---|---|---|
+| Mobile | < 768px | (base) | Device frame, bottom tab bar, single column |
+| Tablet | 768–1279px | `md:` | No device frame, wider padding, top nav |
+| Desktop | ≥ 1280px | `lg:` | Max-width container, top nav |
+
+**Primary test viewports:** 375px (iPhone SE), 390px (iPhone 14 Pro), 768px (iPad), 1280px desktop.
+
+**Critical:** Mobile is the primary use case. Every component must be tested at 375px before committing. Never use `hidden lg:block` for content that kiters need to make decisions.
+
+### Device Frame (mobile only)
+
+```typescript
+// src/components/ui/DeviceFrame.tsx
+// Mobile: phone frame with rounded corners, shadow, grain overlay
+// Tablet+: full width, no frame
+// 375px width, height: min(92vh, 812px)
+// border-radius: 30px (rounded-device in Tailwind)
+// box-shadow: device shadow token
+// Grain overlay: SVG fractalNoise, opacity 0.5, mix-blend-multiply
+```
+
+The DeviceFrame renders children TWICE — once in mobile frame (`md:hidden`) and once for tablet+ (`hidden md:block`). Both instances are mounted in the DOM. This is intentional. data-testid="device-frame" is present.
+
+### VerdictPill component
+
+```
+GO:         bg rgba(126,211,162,0.18), text #7ed3a2
+EYES_OPEN:  bg rgba(217,154,58,0.18), text #d99a3a
+WAIT:       bg rgba(248,113,113,0.18), text #ef4444
+Format: coloured dot (w-1.5 h-1.5) + verdict text in font-mono uppercase tracking-[0.12em]
+```
+
+### Verdict calculation (client-side, not AI)
+
+```typescript
+function calculateVerdict(season: DestinationWindSeason, conditions: DestinationConditions, month: number): 'GO' | 'EYES_OPEN' | 'WAIT' {
+  if (conditions.off_season_months?.includes(month)) return 'WAIT';
+  if (season.rideable_days_per_week_low >= 4) return 'GO';
+  if (season.rideable_days_per_week_low >= 2) return 'EYES_OPEN';
+  return 'WAIT';
+}
+```
+
+### Kite quiver weight scaling
+
+```typescript
+const WEIGHT_OFFSET = { 'under-65': -1, '65-80': 0, '80-95': +1, '95-plus': +2 };
+// Apply offset to each size in kite_sizes_70kg array
+// Always round to whole metre. Never show decimals.
+// e.g. at 80-95kg: ["9m","11m","13m"] → ["10m","12m","14m"]
+```
+
+---
+
+## ROUTING ARCHITECTURE (Phase 2)
+
+React Router v6. All routes in `src/App.tsx`.
+
+```typescript
+const router = createBrowserRouter([
+  { path: '/',                        element: <ExplorePage /> },
+  { path: '/destinations/:slug',      element: <DestinationPage /> },
+  { path: '/trip/:slug',              element: <TripPlanPage /> },
+  { path: '/profile',                 element: <ProfilePage /> },
+  { path: '/trip/shared/:token',      element: <SharedTripView /> },
+  { path: '/admin',                   element: <Admin /> },
+  { path: '/admin/jarvis',            element: <JarvisDashboard /> },
+  { path: '*',                        element: <NotFound /> },
+]);
+```
+
+Always use `useNavigate()` or `<Link>` — never `window.location.href`.
+
+---
+
+## DATA FETCHING PATTERNS (Phase 2)
+
+### RPC vs direct query
+
+**Normalized tables** (SECURITY DEFINER RPC required — direct queries return all nulls):
+destination_conditions, destination_sports, destination_safety, destination_budget, destination_transport, destination_tides, destination_gear, destination_lifestyle, destination_infrastructure, destination_editorial, destination_meta
+
+→ Always use `get_destination_detail_by_slug_v1`.
+
+**Supplementary tables** (public read RLS — query directly):
+destination_areas, kite_hubs, destination_wind_seasons, kite_accommodations, kite_gear_services, destination_daily_living, visa_requirements, culture_safety, kite_spots
+
+→ Query directly from Supabase client. No RPC needed.
+
+**Schools:** use `get_schools_by_destination_v1(input_slug)`. Never query schools table directly. Sort order handled by RPC: kv_pick → manually_verified → capability_count → name.
+
+### TanStack Query v5 pattern
+
+```typescript
+// Standard hook pattern for all data fetching
+export function useDestinationDetail(slug: string) {
+  return useQuery({
+    queryKey: ['destination', slug],
+    queryFn: () => supabase.rpc('get_destination_detail_by_slug_v1', {
+      input_slug: slug
+    }).throwOnError(),
+    staleTime: 1000 * 60 * 10,
+    enabled: !!slug,
+  });
+}
+
+// Direct query for supplementary tables
+export function useWindSeasons(destinationId: string) {
+  return useQuery({
+    queryKey: ['wind-seasons', destinationId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('destination_wind_seasons')
+        .select('*')
+        .eq('destination_id', destinationId)
+        .eq('is_active', true);
+      if (error) throw error;
+      return data;
+    },
+    staleTime: 1000 * 60 * 10,
+    enabled: !!destinationId,
+  });
+}
+```
+
+### Season matching (client-side utility)
+
+```typescript
+// src/lib/season.ts
+export function getSeasonForMonth(seasons: DestinationWindSeason[], month: number): DestinationWindSeason | null {
+  if (!seasons.length) return null;
+  const direct = seasons.find(s => s.months.includes(month));
+  if (direct) return direct;
+  // Transition month — closest by month proximity
+  return seasons.reduce((closest, s) => {
+    const dist = Math.min(...s.months.map(m => Math.abs(m - month)));
+    const closestDist = Math.min(...closest.months.map(m => Math.abs(m - month)));
+    return dist < closestDist ? s : closest;
+  });
+}
+```
+
+---
+
+## TRIP PLANNER — USER INPUTS
+
+### TripPlanInputs type (intake form)
+
+```typescript
+// src/types/trip-plan.ts
+export type WeightBracket = 'under-65' | '65-80' | '80-95' | '95-plus';
+export type GroupType = 'solo' | 'partner' | 'friends' | 'family';
+export type SkillLevel = 'learning' | 'getting-there' | 'comfortable' | 'advanced' | 'foiler';
+export type GearSituation = 'own-kit' | 'renting' | 'mix';
+export type BudgetLevel = 'tight' | 'comfortable' | 'open';
+
+export interface TripPlanInputs {
+  nationality:   string;        // ISO country name
+  arrival:       string;        // YYYY-MM-DD
+  departure:     string;        // YYYY-MM-DD
+  group:         GroupType;
+  skill:         SkillLevel;
+  weight:        WeightBracket;
+  gear:          GearSituation;
+  budget:        BudgetLevel;
+  arrivalMonth:  number;        // 1-12, derived
+  nights:        number;        // derived
+}
+```
+
+### Intake step order (approved design — to be implemented)
+
+**Step 1 — "You":** Group (Solo/Partner/Friends/Family) + Skill (Learning→Foil). Two taps. Cheapest, most identity-affirming inputs first.
+
+**Step 2 — "Your setup":** Weight + Gear + Budget. Three taps. Weight feeds the quiver payoff.
+
+**Step 3 — "When":** Nationality + Dates. The commitment block, last. Dates naturally precede "Build my plan" because they generate the season match.
+
+Rationale: Progressive commitment. Cheapest/most-fun input leads. Heaviest input (date pickers + country search) goes last where sunk-cost carries people through.
+
+---
+
+## AUTH ARCHITECTURE (Phase 2 — not yet built)
+
+Magic link only. No password. No OAuth.
+
+```typescript
+// src/lib/auth.ts
+export async function sendMagicLink(email: string) {
+  return supabase.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: `${window.location.origin}/profile` },
+  });
+}
+```
+
+Auth state: `AuthContext.tsx` wraps app, provides `session` via `onAuthStateChange`.
+
+Conversion flow: "Save this plan" → enter email → magic link → that email IS the lead + conversion in one. Profile page at `/profile` shows saved trips.
+
+**Migration 045 (saved_trips) must be run before this can be built.** See Phase 2 new tables section above.
+
+---
+
+## VOICE & AUTHENTICITY STANDARD
+
+All Claude API-generated content must pass this test. Write like a real person who kites.
+
+**Prohibited vocabulary:** optimal, ecosystem, presents, establishes, aforementioned, leverages, showcases, facilitated, streamlined.
+
+**If you'd never say it to a kiter at the bar, remove it.**
+
+System prompt for all Claude API calls (generate-trip-plan and any new Edge Functions):
+```
+Write like a real person who kites. Use contractions. Prefer simple words.
+Understate rather than oversell.
+Avoid: 'presents,' 'establishes,' 'ecosystem,' 'optimal,' 'showcases,' 'leverages.'
+Be honest about limitations. Specific beats vague. Short beats long.
+If you'd never say it to a kiter at the bar, remove it.
+```
 
 Bad: "This destination presents an exceptional opportunity for progression riders"
 Good: "This is a solid spot to improve"
 
-Bad: "Meteorological patterns establish reliable 12-16 knot conditions"
-Good: "You're looking at consistent 12-16 knot winds"
-
-Test on: Dakhla (December), Tarifa (July), Boracay (November).
-Read the output aloud. If it sounds like a brochure, rewrite it.
-Mobile responsiveness: N/A — Edge Function only.
-```
-
-
-### PHASE 3 — Trip Engine Upgrade
-
-**Make the trip planner smarter with all the new data.**
-
-**What the engine has now:**
-- 10–11 parallel Claude API calls (~44 seconds)
-- Basic personalization (skill level, group size, dates, gear, accommodation style, budget)
-
-**What it needs:**
-
-New modal inputs (planned):
-- Nationality (for visa logic) — must be tap selection, not text field
-- Trip goals / achievement focus (learn backrolls, chill, explore, progress)
-- Rest day style (explore/stay close/cowork/just want wind)
-
-**Trip Personality Banner (Call 0):**
-A new first section in Trip Plan Output summarizing who you are and what this trip is built around. Reads like: *"You're an intermediate rider with 7 days and full gear. You want to nail backrolls. Here's the plan."*
-
-**Smarter data injection:**
-Once real venue data is ingested (Phase 2), the Edge Function should pull from DB and inject into prompts:
-- Real school names + pricing from schools table
-- Real accommodation options from venue tables
-- Real no-wind activities from Google Places data
-- Real safety/culture notes from Perplexity P7
-
-The AI shouldn't be generating venue names or safety info. It should be narrating around real DB data.
-
-**Progression Path (Call 12, conditional):**
-Only fires if skill goals were selected. Builds a day-by-day progression arc.
-
 ---
 
-### PHASE 4 — Soft Launch + Community
+## CONDITIONAL RENDERING — CRITICAL RULES
 
-#### Vercel Deployment Checklist
-- [ ] Add `vercel.json` with SPA rewrite rules
-- [ ] Set env vars: `VITE_KITEVERSE_SUPABASE_URL` + `VITE_KITEVERSE_SUPABASE_ANON_KEY`
-- [ ] Confirm correct Supabase project (`xthaiitjoccrrqivjlor` — not the old one)
-- [ ] End-to-end test all 25 destination pages
-- [ ] Trip plan generation test: Dakhla, Tarifa, Boracay
-- [ ] Mobile test on real iPhone (not just Chrome DevTools)
-
-#### Facebook Community Strategy
-
-The kitesurfing community lives on Facebook groups. That's where buying decisions happen.
-
-**The core principle: be a kiter first, founder second.**
-
-For every post that mentions KiteVurse, make 3 genuine community contributions first.
-
-**Post types (rotate weekly):**
-
-| Type | Frequency | What it looks like |
-|---|---|---|
-| Local knowledge | 2–3×/week | "Just back from Dakhla — thermals kick in reliably around 1pm in December. Happy to answer questions." |
-| Honest destination take | 1×/week | "Boracay in November: wind's more consistent than the reputation suggests. Here's what I found." |
-| Community question | 1–2×/week | "Anyone been to Phan Rang recently? Trying to nail the best window." |
-| KiteVurse soft mention | 1–2×/month | "I built a tool that puts this kind of info together — worth a look if you're planning." |
-| Trip plan share | 1–2×/month | Screenshot of a real KiteVurse trip plan for a destination the group is actively discussing |
-
-**Tone rules:**
-- First person: "I found," "in my experience," "what I noticed"
-- Include honest negatives: "the accommodation there is genuinely limited"
-- No marketing language. Ever.
-- Drop links only when someone explicitly asked for recommendations
-
-**What NOT to do:**
-- Never cold-post "check out my new platform"
-- Never respond to every destination question with a KiteVurse link
-- Never post the same message across multiple groups
-- Never use: "excited to share," "game changer," "revolutionary"
-
----
-
-### PHASE 5 — Agents + Pro + Scale
-
-#### KiteVurse Agentic System
-
-**Agents to build (in order):**
-
-| Agent | What it really is | Build when |
-|---|---|---|
-| Community submission form | Automated form → admin queue → your approval | Phase 5A (simplest — start here) |
-| Spot verification via schools | Email outreach → follow-up → response parsing | Phase 5B |
-| Facebook content scheduling | n8n + Claude API generates post drafts → you approve | Phase 5B (after you know what content works) |
-| Analytics monitor | Scheduled report → Claude summarizes → Slack/email | Phase 5C (only when you have real traffic) |
-| Apollo lead generation | Not relevant yet — no B2B sales motion defined | Phase 5D |
-
-Start with the community submission form. Lowest risk, highest learning density.
-
-Stack: Claude API + n8n (free, visual, no-code friendly)
-Flow: Form submitted → Claude reviews for spam/quality → routes to admin queue → you approve → data hits DB
-
-**The DENNIS dashboard** comes after you have 3–4 working agents. The dashboard is the orchestration layer. Don't build it first. (Note: DENNIS dashboard at `/admin/jarvis` was built early as a placeholder — populate it with real agent data in Phase 5.)
-
-**Learning path:**
-1. Read: Anthropic's agent design patterns (docs.anthropic.com)
-2. Map the community form flow on paper: Trigger → Perception → Decision → Action → Loop
-3. Build it in n8n (1–2 weeks)
-4. Add state management for school follow-up agent (2 weeks)
-5. Wire to Supabase DB
-6. Populate DENNIS dashboard with real data
-
-#### KiteVurse Pro ($49/year)
-
-Don't build until you have 200+ free users actively using trip planning.
-
-Likely scope:
-- Side-by-side destination comparison
-- Saved trip plans
-- Month-by-month wind calendar for all destinations
-- Early access to new destinations
-- Advanced personalization (progression tracking)
-
-#### Scale to 76 Staged Destinations
-
-76 destinations are already seeded (`is_active = false`).
-- Run Perplexity v4 for all 76
-- Run Google Places for all 76
-- Activate in batches of 10–15
-- ⚠️ Fix DELETE + INSERT overwrite problem before building periodic refresh
-
----
-
-### Architecture Decisions (Locked)
-
-| Decision | What | Why |
-|---|---|---|
-| Data source split | Google Places = venues. Perplexity = context/narrative. | Never ask Perplexity to re-collect what Google Places has. |
-| Structured JSON output | All Perplexity prompts return pure JSON | Eliminates 40% null rate from label mismatch. |
-| Data availability flag | Every response includes `data_availability.complete` | Drives frontend display logic for sparse destinations. |
-| Sparse data = honest info | Never show empty cards | Absence of data tells users something real about the destination. |
-| RPC-first | Never direct table queries | RLS on normalized tables requires SECURITY DEFINER on every RPC. |
-| SECURITY DEFINER | Mandatory on all RPCs joining normalized tables | Missing this = silent all-nulls bug with no error message. |
-| Slug routing | `/destinations/:slug` always | No ID routes. |
-| No text fields in modal | Tap-only Trip Planner | Reduces friction. Enforces structure. |
-| Claude API never generates facts | No airport codes, wind data, hazards from AI | Mauritius hallucination (SIR vs MRU) made this non-negotiable. |
-| Layer 1 + Layer 2 | GO/NO-GO card + 8-section accordion | Quick answer first, depth second. |
-| Human voice | Anti-AI baseline in all content | Users trust honesty and imperfection over polished AI prose. |
-
----
-
-### Current Status (Updated 2026-06-02 — DB state queried 2026-06-02T05:00:05)
-
-| Item | Status |
-|---|---|
-| Perplexity v4 collection (P7–P15, all 25 destinations) | ✅ Complete |
-| Perplexity v5 collection (P16–P19, all 25 destinations) | ✅ Complete |
-| Perplexity parser (P7–P19 → production tables) | ✅ Complete |
-| Google Places data (2,388 rows in google_places_raw) | ✅ Collected |
-| Google Places admin review queue | ✅ Built + used |
-| Google Places ingestion (staging → production) | ✅ Complete (300 approved_social_intel rows) |
-| destination_wind_seasons (48 rows, P9 — migration 037) | ✅ Complete |
-| destination_areas (177 rows, P14) | ✅ Complete |
-| kite_hubs (139 rows, P15 — P20 row fields extracted via migration 048) | ✅ Complete |
-| kite_schools — DROPPED (migration 044, 2026-05-28; data merged into schools) | ✅ Complete |
-| kite_accommodations (141 rows, P17 — migration 039) | ✅ Complete |
-| kite_gear_services (161 rows, P18 — migration 040) | ✅ Complete |
-| destination_daily_living (25 rows, P19 — migration 041) | ✅ Complete |
-| schools (183 rows — deduped via migration 043; single source of truth) | ✅ Complete |
-| Data collection scripts in repo (`scripts/data-collection/`) | ✅ Complete |
-| run_collector.ps1 launcher + STANDARDS.md | ✅ Complete |
-| build_destination_object.py updated for P19 (destination_daily_living included in output) | ✅ Complete |
-| Nightly auto-update script (CLAUDE-REFERENCE-FULL.md) | ✅ Complete |
-| Public context mirror (kitevurse-context repo) | ✅ Complete |
-| DENNIS ops dashboard (`/admin/jarvis`) | ✅ Built (placeholder data) |
-| DestinationPage.tsx (dark hero, season switcher, MyBasePicker spine, SchoolCard — migration 046+047) | ✅ Complete (2026-05-29, 25/25 Playwright tests passing) |
-| Design system + shared nav components | ✅ Complete (2026-05-29) |
-| Desktop filter layout (3-row: Sport+Skill / Month / Region — all options visible, no clipping) | ✅ Complete (2026-05-29) |
-| P20 kite hub summaries (eat, sleep, recovery, social, evening — all 139 hubs, missing_p20 = 0) | ✅ Complete (2026-05-31) |
-| P20 row field extraction (17 discrete fields on all 139 kite_hubs rows — migration 048) | ✅ Complete (2026-05-31) |
-| Desktop hero zone layout + design system polish | ✅ Complete (2026-06-01) |
-| Mobile rebuild | 🟡 In progress |
-| Data wiring (Sections 01–05 frontend) | 🟡 In progress |
-| Voice rewrite (Edge Function) | 🔴 Not started |
-| P0 bugs (6 items) | 🔴 Not fixed |
-| Vercel deployment | 🔴 Not done |
-| Facebook engagement | 🔴 Not started |
-| Agentic system | 🔴 Not started |
-| KiteVurse Pro | 🔴 Not scoped |
-
-**Phase 2 priority order:**
-2. Wire data into frontend sections 01–05 — 1 session per section
-3. Voice rewrite in Edge Function — 1 session
-4. Fix remaining P0 bugs (items 1–4) — ~2 sessions
-5. Deploy to Vercel
-6. Start Facebook community
+- **Null field = omit that row.** Never render "null" or empty string in the UI.
+- **No blank sections.** Every section must show real data or a sparse fallback card.
+- **Sparse fallback:** if data incomplete, show a 2-sentence "what we know" card rather than nothing.
+- **Schools never in trip plan.** Schools section in trip plan output = one CTA line only: `"{N} schools at this destination — Compare all ↗"` → `/destinations/:slug#schools`. Never render school cards in trip plan output.
+- **Day 1 no wind always REST.** Hardcoded UX rule regardless of destination data.
+- **kv_pick sort via RPC.** Do not re-sort schools after fetching — the RPC sort is authoritative.
+- **Airport codes from airports table via destinations.airport_iata JOIN.** Never hardcode. Claude API never generates airport codes.
 
 ---
 
@@ -396,7 +515,7 @@ Likely scope:
 
 ### 1A. Core Normalized Tables (10 tables, 101 rows each)
 
-All 10 tables were created in `migrations/001_create_normalized_tables.sql` and populated in `migrations/002_migrate_data.sql`. Every table has RLS enabled. All are read by the main RPCs via `SECURITY DEFINER`. Row count: **101 rows per table** (25 active + 76 inactive destinations).
+All 10 tables created in `migrations/001_create_normalized_tables.sql`. Every table has RLS enabled. All read by main RPCs via SECURITY DEFINER. Row count: **101 rows per table** (25 active + 76 inactive destinations).
 
 ---
 
@@ -424,996 +543,168 @@ All 10 tables were created in `migrations/001_create_normalized_tables.sql` and 
 | rainy_season_months | smallint[] |
 | best_month_start | smallint |
 | best_month_end | smallint |
-| parsed_data | jsonb (added migration 014) |
-| parsed_at | timestamptz (added migration 014) |
-| needs_refresh_by | date (added migration 014) |
-| open_meteo_data | jsonb (added migration 014) |
-| data_source | text (added migration 035) |
+| parsed_data | jsonb |
+| parsed_at | timestamptz |
+| needs_refresh_by | date |
+| open_meteo_data | jsonb |
+| data_source | text |
 | created_at / updated_at | timestamptz |
 
 ---
 
 **destination_sports** — Discipline scores and skill level data
 
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| destination_id | uuid FK → destinations |
-| disciplines_supported | text[] |
-| skill_levels_supported | text[] |
-| beginner_friendliness_score | smallint |
-| kitesurf_score | smallint |
-| wingfoil_score | smallint |
-| kitefoil_score | smallint |
-| freestyle_score | smallint |
-| freeride_score | smallint |
-| wave_riding_score | smallint |
-| downwind_score | smallint |
-| created_at / updated_at | timestamptz |
+Key columns: destination_id FK, disciplines_supported text[], skill_levels_supported text[], beginner_friendliness_score, kitesurf_score, wingfoil_score, kitefoil_score, freestyle_score, freeride_score, wave_riding_score, downwind_score.
 
 ---
 
 **destination_safety** — Hazards and risk scores
 
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| destination_id | uuid FK → destinations |
-| jellyfish_risk_score | smallint |
-| algae_risk_score | smallint |
-| water_hazard_score | smallint |
-| theft_risk_score | smallint |
-| scam_risk_score | smallint |
-| medical_access_score | smallint |
-| crowding_score | smallint |
-| parsed_data | jsonb (added migration 014) |
-| parsed_at | timestamptz (added migration 014) |
-| needs_refresh_by | date (added migration 014) |
-| created_at / updated_at | timestamptz |
+Key columns: destination_id FK, jellyfish_risk_score, algae_risk_score, water_hazard_score, theft_risk_score, scam_risk_score, medical_access_score, crowding_score.
 
 ---
 
 **destination_budget** — Cost and accommodation data
 
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| destination_id | uuid FK → destinations |
-| budget_level | text |
-| average_daily_budget_usd | numeric(8,2) |
-| average_monthly_budget_usd | numeric(10,2) |
-| average_meal_cost_usd | numeric(6,2) |
-| accommodation_cost_score | smallint |
-| scooter_rental_monthly_usd | numeric(8,2) |
-| long_term_rental_availability | boolean |
-| created_at / updated_at | timestamptz |
+Key columns: destination_id FK, budget_level, average_daily_budget_usd, average_monthly_budget_usd, average_meal_cost_usd, accommodation_cost_score, scooter_rental_monthly_usd, long_term_rental_availability.
 
 ---
 
 **destination_transport** — Getting there and getting around
 
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| destination_id | uuid FK → destinations |
-| nearest_airport | text |
-| airport_distance_minutes | smallint |
-| transportation_required | boolean |
-| scooter_friendly | boolean |
-| car_recommended | boolean |
-| walkable | boolean |
-| created_at / updated_at | timestamptz |
+Key columns: destination_id FK, nearest_airport, airport_distance_minutes, transportation_required, scooter_friendly, car_recommended, walkable.
 
 ---
 
 **destination_tides** — Tide-specific data
 
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| destination_id | uuid FK → destinations |
-| tide_dependent | boolean (default false) |
-| best_tide | text |
-| tide_notes | text |
-| tidal_range | text |
-| tidal_currents | boolean |
-| booties_recommended | boolean |
-| created_at / updated_at | timestamptz |
+Key columns: destination_id FK, tide_dependent boolean, best_tide, tide_notes, tidal_range, tidal_currents, booties_recommended.
 
 ---
 
 **destination_gear** — Wetsuit and equipment requirements
 
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| destination_id | uuid FK → destinations |
-| wetsuit_needed | boolean |
-| recommended_wetsuit_thickness | text |
-| created_at / updated_at | timestamptz |
+Key columns: destination_id FK, wetsuit_needed, recommended_wetsuit_thickness.
 
 ---
 
 **destination_lifestyle** — Digital nomad and community data
 
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| destination_id | uuid FK → destinations |
-| wifi_quality_score | smallint |
-| coworking_available | boolean |
-| beachfront_availability | boolean |
-| digital_nomad_friendliness | smallint |
-| facebook_groups_available | boolean |
-| whatsapp_groups_available | boolean |
-| telegram_groups_available | boolean |
-| expat_community_strength | smallint |
-| local_scene_size | smallint |
-| parsed_data | jsonb (added migration 014) |
-| parsed_at | timestamptz |
-| needs_refresh_by | date |
-| created_at / updated_at | timestamptz |
+Key columns: destination_id FK, wifi_quality_score, coworking_available, beachfront_availability, digital_nomad_friendliness, facebook_groups_available, whatsapp_groups_available, expat_community_strength, local_scene_size.
 
 ---
 
-**destination_infrastructure** — Schools (JSONB), facilities, gear, rescue
+**destination_infrastructure** — Facilities, gear, rescue
 
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| destination_id | uuid FK → destinations |
-| kite_schools | jsonb |
-| launch_zones | jsonb |
-| gear_rental | jsonb |
-| gear_storage | jsonb |
-| repair_services | jsonb |
-| rescue_services | jsonb |
-| infrastructure_logistics | jsonb |
-| storage_available | boolean |
-| beach_assistance_available | boolean |
-| wingfoil_schools_available | boolean |
-| parsed_data | jsonb (added migration 014) |
-| parsed_at | timestamptz |
-| needs_refresh_by | date |
-| created_at / updated_at | timestamptz |
+Key columns: destination_id FK, kite_schools (jsonb — LEGACY: use schools table instead), launch_zones jsonb, gear_rental jsonb, gear_storage jsonb, repair_services jsonb, rescue_services jsonb, storage_available, beach_assistance_available, wingfoil_schools_available.
+
+⚠️ `destination_infrastructure.kite_schools` is a legacy JSONB field. Use the `schools` table for all school data.
 
 ---
 
 **destination_editorial** — Narrative and prose content
 
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| destination_id | uuid FK → destinations |
-| vibe_summary | text |
-| best_for_summary | text |
-| not_for_summary | text |
-| reality_check | text |
-| practical_notes | text |
-| daily_life_summary | text |
-| common_frustrations | text |
-| no_wind_activities | text |
-| fitness_options | text |
-| cafe_cowork | text |
-| local_areas | text |
-| cultural_notes | text |
-| school_recommendations | text (legacy — schools table is now source of truth) |
-| no_wind_activities_structured | jsonb |
-| no_wind_verdict | text |
-| cultural_notes_universal | text |
-| cultural_notes_family | text |
-| night_scene | text |
-| areas_recommendation | text (added migration 036 — P14 output: overall neighbourhood recommendation paragraph) |
-| scene_summary | text (added migration 036 — P15 output: kite scene overview for the destination) |
-| proximity_reality | text (added migration 036 — P15 output: honest take on kite spot distance / logistics) |
-| created_at / updated_at | timestamptz |
+Key columns: destination_id FK, vibe_summary, best_for_summary, not_for_summary, reality_check, practical_notes, daily_life_summary, no_wind_activities, fitness_options, no_wind_activities_structured jsonb, no_wind_verdict, cultural_notes_family, night_scene, areas_recommendation, scene_summary, proximity_reality.
 
 ---
 
 **destination_meta** — Data quality and research status
 
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| destination_id | uuid FK → destinations |
-| confidence_score | smallint |
-| data_status | text |
-| manually_verified | boolean (default false) |
-| ai_generated_fields | text[] |
-| source_count | smallint |
-| research_priority | smallint |
-| needs_research | boolean (default false) |
-| research_notes | text |
-| personal_experience | boolean (default false) |
-| created_at / updated_at | timestamptz |
+Key columns: destination_id FK, confidence_score, data_status, manually_verified boolean, ai_generated_fields text[], source_count, personal_experience boolean.
 
 ---
 
-### 1B. Supplementary Content Tables
-
-These tables have **public read** RLS policies (anon can read directly).
+### 1B. Supplementary Content Tables (public read RLS — query directly)
 
 ---
 
-**schools** — Kite schools and instructors (183 records across 25 destinations — deduped 2026-05-28: 14 near-duplicates removed via migration 043, table merged from kite_schools via migration 042, kite_schools dropped via migration 044)
+**schools** — Kite schools and instructors
 
-**Single source of truth for all school data.** Served by `get_schools_by_destination_v1`. `kv_pick` is set manually by Dan (max 1 per destination) — no automated process should ever set it to true.
+183 rows across 25 active destinations. `kv_pick` boolean (max 1 per destination — set manually). Sort via `get_schools_by_destination_v1` RPC: kv_pick DESC, manually_verified DESC, capability_count DESC, name ASC.
 
-**Data ownership (enforced by trigger `enforce_perplexity_no_insert` — migration 043):**
-- Google Places → inserts new school rows (name, website, phone, google_maps_url, rating, review_count)
-- Perplexity P16 → UPDATE only (enriches null fields: lesson_price_usd_from, certifications, accommodation_available). Never inserts. Parser: `parse_p16` in `kitevurse_perplexity_parser.py`.
+Key columns: destination_id FK, school_name, slug, disciplines_supported text[], website/whatsapp/email/phone/instagram_url/google_maps_url, storage_available/rescue_available/gear_rental_available/foil_rental_available boolean, rating, manually_verified, skill_levels_taught text[], certifications text[], lesson_price_usd_from, kv_pick boolean.
 
-**data_source values:** `perplexity` (original seeded rows), `perplexity_p16` (migration 042 inserts from deprecated kite_schools), `perplexity_enriched` (updated by parse_p16 enrichment), `google_places` (future Google Places inserts).
-
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| destination_id | uuid FK → destinations |
-| school_name | text |
-| slug | text |
-| school_type | text[] |
-| disciplines_supported | text[] |
-| website / whatsapp / email / phone / instagram_url / google_maps_url | text |
-| storage_available / rescue_available / gear_rental_available / foil_rental_available | boolean |
-| wingfoil_lessons_available / kitefoil_lessons_available / repair_services_available | boolean |
-| rating | numeric |
-| review_count / price_level / trust_score | integer |
-| manually_verified | boolean |
-| notes | text |
-| skill_levels_taught | text[] |
-| certifications | text[] |
-| lesson_price_usd_from | integer |
-| accommodation_available | boolean |
-| group_size_max | integer |
-| children_lessons_available / radio_helmets | boolean |
-| gear_brand | text |
-| kv_pick | boolean (default false — max 1 per destination, set manually) |
-| created_at / updated_at | timestamptz |
+⚠️ `kite_schools` table was DROPPED in migration 044. `schools` is the ONLY source of school data.
 
 ---
 
-**destination_wifi** — WiFi and connectivity data (8 rows)
+**destination_wind_seasons** — Per-season wind data (migration 037)
 
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| destination_id | uuid FK → destinations |
-| avg_download_mbps / avg_upload_mbps | numeric |
-| avg_latency_ms | integer |
-| speed_consistency / outage_frequency / outage_typical_duration | text |
-| seasonal_issues / peak_hours_description | text |
-| peak_hour_slowdowns | boolean |
-| wifi_quality_score / reliability_score / nomad_viability_score | smallint |
-| mobile_backup_viable | boolean |
-| best_carrier_backup / best_area_for_wifi / best_accommodations / best_cafes_coworking | text |
-| video_calls_reliable / streaming_reliable / file_upload_reliable | boolean |
-| nomad_verdict / nomad_verdict_notes | text |
-| data_source | text |
-| manually_verified | boolean |
-| last_verified_at | date |
-| notes | text |
-| parsed_data | jsonb |
-| parsed_at | timestamptz |
-| needs_refresh_by | date |
-| created_at / updated_at | timestamptz |
+Full schema in Phase 2 section above. All 25 active destinations have seasons populated. 48 rows total. 2+ seasons per destination for multi-season spots (e.g. KUZI + KASKAZI for Diani Beach, Kenya). Query directly with `destination_id` filter.
 
 ---
 
-**nightlife_venues** — Bars, clubs, live music venues (544 rows)
+**destination_areas** — Neighbourhood/area intel per destination (177 rows)
 
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| destination_id | uuid FK → destinations |
-| name | text |
-| venue_type | text |
-| address / google_maps_url / website / instagram_url / phone | text |
-| vibe / atmosphere_notes | text |
-| beer_price_usd / cocktail_price_usd / cover_charge_usd / typical_spend_usd | numeric |
-| opening_time / closing_time / busy_nights / live_music_nights | text |
-| crowd_type / music_genre | text |
-| good_for_solo / good_for_groups / kiter_hangout | boolean |
-| rating | numeric |
-| review_count | integer |
-| worth_it_verdict | text |
-| tourist_trap / to_avoid | boolean |
-| avoid_reason | text |
-| data_source | text |
-| manually_verified | boolean |
-| last_verified_at | date |
-| notes | text |
-| is_active | boolean |
-| parsed_data | jsonb |
-| parsed_at | timestamptz |
-| needs_refresh_by | date |
-| created_at / updated_at | timestamptz |
+One row per distinct area. Key columns: destination_id FK, name, distance_to_kite_spot_km, vibe, best_for, accommodation_options, restaurants_nightlife, price_relative, walkable_to_kite, kiter_verdict (BEST BASE / GOOD OPTION / TRADEOFF / SKIP), is_active.
+
+Sort: BEST BASE(1) → GOOD OPTION(2) → TRADEOFF(3) → SKIP(4). Max 4 shown in picker.
 
 ---
 
-**no_wind_activities** — Activities for wind-free days (416 rows)
+**kite_hubs** — Kite scene hubs (139 rows)
 
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| destination_id | uuid FK → destinations |
-| category | text |
-| name | text |
-| address / google_maps_url / website / phone / whatsapp / instagram_url | text |
-| description | text |
-| services_offered | text[] |
-| drop_in_price_usd / hourly_price_usd / weekly_price_usd / monthly_price_usd | numeric |
-| opening_hours | text |
-| morning_available / afternoon_available / evening_available | boolean |
-| beginner_friendly / drop_in_welcome | boolean |
-| equipment_quality | text |
-| ac_available / parking_available | boolean |
-| rating | numeric |
-| review_count | integer |
-| worth_it_verdict | text |
-| data_source | text |
-| manually_verified | boolean |
-| last_verified_at | date |
-| notes | text |
-| is_active | boolean |
-| parsed_data | jsonb |
-| parsed_at | timestamptz |
-| needs_refresh_by | date |
-| created_at / updated_at | timestamptz |
+Key columns: destination_id FK, name, type, location_description, school_names text[], facilities text[], vibe, crowd, accommodation_on_site, kiter_verdict (SOCIAL HUB / GOOD BASE / QUIET OPTION / LESSONS ONLY), manually_verified, is_active.
+
+Sort: SOCIAL HUB(1) → GOOD BASE(2) → QUIET OPTION(3) → LESSONS ONLY(4). Max 2 shown in trip plan output.
 
 ---
 
-**recovery_services** — Massage, physio, sports recovery (444 rows)
+**visa_requirements** — Entry requirements per destination/passport pair
 
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| destination_id | uuid FK → destinations |
-| name | text |
-| service_type | text |
-| address / google_maps_url / website / phone / whatsapp | text |
-| services_offered | text[] |
-| description | text |
-| price_per_hour_usd / session_price_usd / package_price_usd | numeric |
-| opening_hours | text |
-| walk_in_friendly / appointment_required / athlete_experience / kite_sport_relevant | boolean |
-| why_good_for_kiters | text |
-| rating | numeric |
-| review_count | integer |
-| worth_it_verdict | text |
-| data_source | text |
-| manually_verified | boolean |
-| last_verified_at | date |
-| notes | text |
-| is_active | boolean |
-| parsed_data | jsonb |
-| parsed_at | timestamptz |
-| needs_refresh_by | date |
-| created_at / updated_at | timestamptz |
+251 rows. Key columns: destination_id FK (nullable), passport_country, visa_required, visa_free_days, visa_type, cost_usd, processing_days, application_url, e_visa_available, valid_as_of.
+
+Query: `supabase.from('visa_requirements').select('*').eq('destination_id', id).eq('passport_country', nationality).single()`
 
 ---
 
-**restaurants** — Dining options (623 rows)
+**kite_accommodations** — Accommodation near kite spots
 
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| destination_id | uuid FK → destinations |
-| name | text |
-| meal_type / cuisine_type | text |
-| address / google_maps_url / website / phone | text |
-| budget_meal_usd / average_meal_usd / upscale_meal_usd | numeric |
-| opening_hours / atmosphere | text |
-| breakfast_served / lunch_served / dinner_served | boolean |
-| reservations_required | boolean |
-| good_for_solo / good_for_groups / good_for_families | boolean |
-| vegetarian_options / vegan_options / gluten_free_options / seafood_heavy | boolean |
-| food_safety_notes | text |
-| rating | numeric |
-| review_count | integer |
-| local_recommendation / tourist_trap | boolean |
-| worth_it_verdict / specialties | text |
-| data_source | text |
-| manually_verified | boolean |
-| last_verified_at | date |
-| notes | text |
-| is_active | boolean |
-| parsed_data | jsonb |
-| parsed_at | timestamptz |
-| needs_refresh_by | date |
-| created_at / updated_at | timestamptz |
+141 rows. Key columns: destination_id FK, name, area_name, distance_to_launch_m, price_per_night_usd_low/high, gear_storage boolean, kite_packages boolean, community_favourite boolean, website, is_active.
+
+Sort: community_favourite DESC, distance_to_launch_m ASC. Show max 2 in trip plan.
 
 ---
 
-**sim_card_options** — Mobile data options per destination (0 rows)
+**kite_gear_services** — Gear rental and services
 
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| destination_id | uuid FK → destinations |
-| country_code / carrier_name / carrier_market_share / coverage_quality | text |
-| tourist_sim_available | boolean |
-| week_data_gb / week_cost_usd / month_data_gb / month_cost_usd | numeric |
-| unlimited_available | boolean |
-| purchase_locations | text[] |
-| passport_required | boolean |
-| activation_time | text |
-| english_support | boolean |
-| esim_available | boolean |
-| setup_difficulty | text |
-| hotspot_allowed | boolean |
-| hotspot_speeds / hotspot_reliability | text |
-| best_for_short_stay / best_for_long_stay / recommended | boolean |
-| data_source | text |
-| manually_verified | boolean |
-| last_verified_at | date |
-| notes | text |
-| parsed_data | jsonb |
-| parsed_at | timestamptz |
-| needs_refresh_by | date |
-| created_at / updated_at | timestamptz |
+161 rows. Key columns: destination_id FK, service_type (rental/repair/storage), name, price_per_day_usd, stranded_risk (LOW/MEDIUM/HIGH), is_active.
 
 ---
 
-**transportation** — Scooter/car/transport vendors per destination (464 rows)
+**destination_daily_living** — Daily logistics
 
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| destination_id | uuid FK → destinations |
-| vendor_name | text |
-| transport_type | text |
-| website / whatsapp / phone / email / facebook_url / google_maps_url | text |
-| daily_price_usd / weekly_price_usd / monthly_price_usd | integer |
-| board_bag_friendly / airport_pickup_available / delivery_available / insurance_included | boolean |
-| trust_score / scam_risk_score | integer |
-| manually_verified | boolean |
-| notes | text |
-| is_active | boolean (added migration 035) |
-| parsed_data | jsonb |
-| parsed_at | timestamptz |
-| needs_refresh_by | date |
-| created_at / updated_at | timestamptz |
+Key columns: destination_id FK, transport_primary, transport_price_range, transport_negotiate boolean, ride_app_available boolean, payment_app_name, payment_app_tourist_ok boolean, usd_accepted boolean, tap_water_safe boolean, sim_worth_it boolean, sim_carrier, sim_where_to_buy, english_sufficient boolean, english_notes, beach_dress, offbeach_dress, tip_restaurant_pct, bargaining boolean, is_active.
 
 ---
 
-**visa_requirements** — Entry requirements per destination/passport pair (251 rows)
-
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| destination_id | uuid FK → destinations (added migration 034, nullable) |
-| destination_country_code | text (now nullable — was required) |
-| destination_name | text (now nullable — was required) |
-| passport_country / passport_country_code | text |
-| visa_required | boolean (now nullable — migration 035) |
-| visa_free_days | integer |
-| visa_type / processing_days | integer |
-| cost_usd | numeric |
-| apply_where / application_url | text |
-| required_documents | text[] |
-| passport_validity_months | integer |
-| return_ticket_required / proof_accommodation / proof_of_funds | boolean |
-| funds_amount_usd | integer |
-| e_visa_available | boolean |
-| e_visa_processing_days / e_visa_cost_usd | numeric |
-| e_visa_url | text |
-| e_visa_multiple_entry / voa_available | boolean |
-| voa_cost_usd | numeric |
-| voa_payment_method | text |
-| extension_available | boolean |
-| extension_cost_usd | numeric |
-| extension_days | integer |
-| departure_tax_usd | numeric |
-| departure_tax_in_ticket | boolean |
-| overstay_fine_usd_per_day | numeric |
-| overstay_enforcement | text |
-| official_website / embassy_contact | text |
-| data_source | text |
-| manually_verified | boolean |
-| last_verified_at / valid_as_of | date |
-| notes | text |
-| parsed_data | jsonb |
-| parsed_at | timestamptz |
-| needs_refresh_by | date |
-| created_at / updated_at | timestamptz |
+**destination_wifi** — WiFi and connectivity (8 rows — see full schema in original ref)
+**nightlife_venues** — Bars and clubs (544 rows — see full schema in original ref)
+**no_wind_activities** — Activities for wind-free days (416 rows — see full schema in original ref)
+**recovery_services** — Massage, physio, sports recovery (444 rows — see full schema in original ref)
+**restaurants** — Dining options (623 rows — see full schema in original ref)
+**sim_card_options** — Mobile data options (0 rows — see full schema in original ref)
+**transportation** — Transport vendors (464 rows — see full schema in original ref)
 
 ---
 
-### 1C. Phase 1 Schema Tables (migration 014)
+### 1C–1I. Other Tables (unchanged from previous version)
+
+culture_safety (25 rows), medical_emergency (0 rows), coworking_spaces (274 rows) (Phase 1 schema tables — see previous reference for full schemas)
+
+social_intel_staging (352 rows), wind_community_reports (0 rows), accommodation_reviews (0 rows), destination_condition_updates (0 rows) (Phase 1 social sourcing tables)
+
+open_meteo_raw (300 rows), google_places_raw (2,388 rows), seabreeze_raw (26 rows), rome2rio_raw (0 rows), noaa_copernicus_raw (300 rows), approved_social_intel (300 rows) (Phase 1 data source tables)
+
+kite_spots (117 rows), spot_regulations (27 rows), destination_kiter_logistics (27 rows) (Spot & logistics tables — migrations 030-032)
+
+research_staging (837 rows), destination_media, airports (Supporting tables)
 
 ---
 
-**coworking_spaces** — Co-working spaces and wifi cafés (274 rows)
+### 1J. Pending Tables (NOT YET CREATED)
 
-Key columns: destination_id FK, name, venue_type, address, google_maps_url, website, phone, wifi_speed_mbps_down/up, wifi_reliability, has_power_outlets, has_ac, has_phone_booths, price_model, day_pass_usd, monthly_membership_usd, min_spend_usd, opening_hours, noise_level, best_hours_for_work, rating_for_work, rating, worth_it_verdict, data_source, manually_verified, last_verified_at, notes, is_active, parsed_data, parsed_at, needs_refresh_by, created_at, updated_at.
-
-RLS: Public read enabled.
-
----
-
-**culture_safety** — Language, safety, customs, tipping per destination (25 rows)
-
-Key columns: destination_id UUID UNIQUE FK, primary_language, english_tourist_areas, english_general_public, essential_phrases (jsonb), overall_safety_rating, kite_beach_safety_rating, safe_zones/avoid_zones (text[]), petty_crime_risk/violent_crime_risk, common_scams (text[]), night_safety_notes, solo_female_safety_notes, dress_code_beach/town, tipping_restaurants_pct/massage_usd/taxi_pct/hotel_usd_per_day, tipping_expected, photography_restrictions, religious_considerations, alcohol_available, lgbtq_safety_notes, data_source, manually_verified, notes, parsed_data, parsed_at, needs_refresh_by, created_at, updated_at.
-
-RLS: Public read enabled.
-
----
-
-**medical_emergency** — Emergency contacts, hospitals, rescue protocol per destination (0 rows)
-
-Key columns: destination_id UUID UNIQUE FK, hospitals/clinics (jsonb), lifeguard_at_kite_spot, lifeguard_seasonal, water_rescue_boat, water_emergency_number, rescue_response_time_min, kite_school_rescue_protocol, pharmacy_name/address/hours_24hr, anti_inflammatories_otc, emergency_police/ambulance/fire/coast_guard/tourist_police, country_calling_code, standard_insurance_covers_kite, recommended_insurers (text[]), avg_insurance_2week_usd, schools_require_insurance, decompression_chamber_location/km, decompression_relevant, data_source, manually_verified, notes, parsed_data, parsed_at, needs_refresh_by, created_at, updated_at.
-
-RLS: Public read enabled.
-
----
-
-### 1D. Phase 1 Social Sourcing Tables (migration 015)
-
----
-
-**social_intel_staging** — Raw ingested posts from all sources (352 rows)
-
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| source | text NOT NULL |
-| destination_id | uuid FK → destinations NOT NULL |
-| raw_post_text | text NOT NULL |
-| post_url | text NOT NULL |
-| author | text |
-| posted_at | timestamptz |
-| ingested_at | timestamptz default now() |
-| sha256_hash | text UNIQUE (dedup key) |
-| status | text default 'pending' (pending/approved/rejected) |
-| admin_notes | text |
-| created_at / updated_at | timestamptz |
-
-Indexes: destination_id, status, source.
-RLS: Public read. Admin write (is_admin JWT claim).
-Unique partial index on (destination_id, source, coalesced_category) WHERE status='pending' (migration 030 — prevents duplicate pending rows).
-
-**Status values by source:**
-- `open_meteo` → `approved` (auto-approved, high confidence 9.5)
-- `google_places` → `pending` (requires admin review)
-- `seabreeze` → `pending` (requires admin review)
-- `noaa_copernicus` → `approved` (auto-approved, confidence 9.0)
-
----
-
-**wind_community_reports** — Parsed wind intelligence (approved staging records promoted here) (0 rows)
-
-Key columns: destination_id FK, report_date, avg_wind_knots, conditions, hazard_flags (text[]), author_name, source, post_url, verified (default false), created_at, updated_at.
-
-RLS: Public read. Admin write.
-
----
-
-**accommodation_reviews** — Sourced accommodation feedback (0 rows)
-
-Key columns: destination_id FK, accommodation_type, price_per_night_usd, rating INT CHECK (1–5), reviewer_name, review_text, source, post_url, verified, created_at, updated_at.
-
-RLS: Public read. Admin write.
-
----
-
-**destination_condition_updates** — Timestamped condition reports (0 rows)
-
-Key columns: destination_id FK, condition_type, severity, description, source, post_url, verified_at, created_at, updated_at.
-
-Condition types: wind, water, infrastructure, safety, accommodation, pricing.
-
-RLS: Public read. Admin write.
-
----
-
-### 1E. Phase 1 Data Source Tables
-
----
-
-**open_meteo_raw** — Monthly historical weather per destination/year (migration 021) (300 rows)
-
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| destination_id | uuid FK → destinations |
-| year | int (default 2024) |
-| month | int CHECK (1–12) |
-| wind_knots | numeric (monthly max of daily max, in knots) |
-| air_temp_c | numeric |
-| water_temp_c | numeric (always NULL — archive API doesn't provide SST) |
-| rainfall_mm | numeric |
-| fetched_at | timestamptz |
-
-UNIQUE (destination_id, year, month). RLS: Public read.
-
----
-
-**google_places_raw** — Venue records from Google Places API (migration 022) (2,388 rows)
-
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| destination_id | uuid FK → destinations |
-| category | text (accommodation/restaurants/markets/kite_schools/gyms/massage/transport/gear_rental/pharmacies/yoga/nightlife) |
-| place_name | text |
-| address | text |
-| rating | numeric |
-| price_level | int (0=free, 1=inexpensive, 2=moderate, 3=expensive, 4=very_expensive) |
-| phone / website / google_maps_url | text |
-| hours | text (weekdayDescriptions joined with '; ') |
-| fetched_at | timestamptz |
-
-UNIQUE (destination_id, category, place_name). RLS: Public read.
-
----
-
-**seabreeze_raw** — Forum threads scraped from seabreeze.com.au (migration 023) (26 rows)
-
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| destination_id | uuid FK → destinations |
-| spot_name / spot_url | text |
-| thread_title / thread_url | text (canonical dedup key) |
-| post_count | int |
-| last_post_date | timestamptz |
-| top_posts | jsonb ([{author, date, excerpt, sentiment}]) |
-| conditions_mentioned | text[] |
-| hazards_mentioned | text[] |
-| equipment_discussed | text[] |
-| raw_html | text (nullable — large) |
-| fetched_at / created_at | timestamptz |
-
-UNIQUE (destination_id, thread_url). RLS: Public read.
-
----
-
-**rome2rio_raw** — Ground transport routes per destination (migration 027) (0 rows)
-
-Key columns: destination_id FK, route_type, origin_name, origin_iata, destination_name, destination_iata, transport_mode, operator_name, duration_hours, price_usd_from, notes, raw_html, fetched_at, created_at.
-
-Dedup: functional unique index with COALESCE(operator_name, '') to handle NULL operator_name safely.
-
-RLS: Public read.
-
----
-
-**noaa_copernicus_raw** — Monthly wave + SST climatology (migration 028) (300 rows)
-
-Key columns: destination_id FK, year (default 2024), month CHECK(1–12), hs_mean/min/max/std (wave height in meters), tp_mean (wave period seconds), direction (compass), sst_mean/min/max (°C from ERA5 hourly), sst_anomaly_c (nullable), fetched_at.
-
-UNIQUE (destination_id, year, month). RLS: Public read. Status in staging: `approved` (auto-approved, confidence 9.0).
-
----
-
-**approved_social_intel** — Audit trail for every approved staging batch (migration 029) (300 rows)
-
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| staging_id | uuid FK → social_intel_staging (ON DELETE SET NULL) |
-| destination_id | uuid FK → destinations |
-| source / category | text |
-| item_count | int |
-| confidence_score | numeric |
-| admin_notes / approved_by | text |
-| approved_at / created_at | timestamptz |
-
-RLS: Public read.
-
----
-
-### 1F. Facebook Strategy Tables (migration 024)
-
----
-
-**facebook_posts** — Raw posts crawled from Facebook groups via Apify (0 rows)
-
-Key columns: id uuid PK, group_id/group_name, post_id (text UNIQUE), post_url, post_text, post_author, post_timestamp, comment_count, reaction_count, created_at, updated_at.
-
----
-
-**facebook_engagement_queue** — Claude drafts + approval workflow (7 rows)
-
-Key columns: id uuid PK, post_id (text), group_id, draft_comment (text), claude_tone, relevance_score (1–10), category, approval_status CHECK (pending/approved/rejected/edited), admin_edits, created_at, updated_at.
-
----
-
-**facebook_engagement_log** — Permanent audit log of all posted comments (0 rows)
-
-RLS: Public read + insert/update (MVP).
-
----
-
-**approval_queue** — Universal approval queue for all manual review workflows (migration 025) (6 rows; 4 pending)
-
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| queue_type | text CHECK (facebook/email/content/social/other) |
-| source_id | text |
-| source_data | jsonb (shape varies per queue_type) |
-| item_title / item_preview | text |
-| draft_text | text |
-| draft_metadata | jsonb |
-| approval_status | text CHECK (pending/approved/rejected/edited/posted — 'posted' added in migration 026) |
-| your_edits | text |
-| your_decision_at | timestamptz |
-| posted_at | timestamptz |
-| posted_id / external_url | text |
-| created_at / updated_at | timestamptz |
-
-RLS: Public read/insert/update (MVP — tighten in Phase 5).
-
----
-
-### 1G. Spot & Logistics Tables (migrations 030–032)
-
----
-
-**kite_spots** — Typed per-spot geographic and safety data (migration 030) (117 rows)
-
-Key columns: id uuid PK, destination_id FK, spot_name, gps_lat/gps_lng, gps_source, spot_type, wind_angle, ideal_wind_direction, wind_direction_range, bottom_type, launch_depth, skill_level, crowd_level_peak (1–10), beach_space_rigging, downwind_hazards, emergency_exit, tide_dependent, data_source (added migration 035), is_active (added migration 035), created_at, updated_at.
-
-One destination may have 1–3 named spots.
-
----
-
-**spot_regulations** — Operational rules, seasonal restrictions, rescue info per destination (migration 031) (27 rows)
-
-Key columns: id uuid PK, destination_id UUID UNIQUE FK, rescue_operator_names (text[]), rescue_coverage_months, rescue_contact, rescue_response_time_mins, beach_patrol_seasonal/months, permit_required, permit_details/where_to_get, permit_cost_usd, seasonal_restrictions, created_at, updated_at.
-
-One row per destination (UNIQUE on destination_id).
-
----
-
-**destination_kiter_logistics** — Kite-travel-specific customs, airline policy, gear transport (migration 032) (27 rows)
-
-Key columns: id uuid PK, destination_id UUID UNIQUE FK, customs_kite_gear, kite_bag_declared_value_usd, customs_practical_advice, drone_import_rules, airline_kite_policy, foil_transport_notes, gear_rental_available/notes, repair_services_available/notes, local_gear_shops (jsonb), created_at, updated_at.
-
----
-
-### 1H. Perplexity Research Output Tables (migration 036)
-
-These two tables are populated by the Perplexity parser (`scripts/data-collection/kitevurse_perplexity_parser.py`) after P14/P15 research runs. RLS: Public read on both. Both populated for all 25 active destinations as of 2026-05-25.
-
----
-
-**destination_areas** — Neighbourhood/area intel per destination (P14 output) (177 rows)
-
-One row per distinct area within a destination. Parser strategy: DELETE auto-generated rows (manually_verified=false) then INSERT fresh rows from P14 JSON.
-
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| destination_id | uuid FK → destinations |
-| name | text NOT NULL |
-| distance_to_kite_spot_km | numeric |
-| vibe | text |
-| best_for | text |
-| accommodation_options | text |
-| restaurants_nightlife | text |
-| price_relative | text |
-| walkable_to_kite | boolean |
-| kiter_verdict | text (BEST BASE / GOOD OPTION / TRADEOFF / SKIP) |
-| data_source | text (default 'perplexity') |
-| manually_verified | boolean (default false) |
-| parsed_data | jsonb |
-| parsed_at / needs_refresh_by | timestamptz / date |
-| is_active | boolean (default true) |
-| created_at / updated_at | timestamptz |
-
-Row count: 177 rows (confirmed 2026-06-02).
-
----
-
-**kite_hubs** — Kite scene hubs and bases per destination (P15 output) (139 rows)
-
-One row per distinct hub/base. Parser strategy: DELETE auto-generated rows (manually_verified=false) then INSERT fresh rows from P15 JSON. P15 also writes `scene_summary` and `proximity_reality` to `destination_editorial`.
-
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| destination_id | uuid FK → destinations |
-| name | text NOT NULL |
-| type | text (school_base / beach_club / informal_spot) |
-| location_description | text |
-| school_names | text[] |
-| facilities | text[] |
-| vibe | text |
-| crowd | text (beginner-heavy / mixed / intermediate-advanced) |
-| accommodation_on_site | boolean (default false) |
-| accommodation_notes | text |
-| hours | text |
-| kiter_verdict | text (SOCIAL HUB / GOOD BASE / QUIET OPTION / LESSONS ONLY) |
-| data_source | text (default 'perplexity') |
-| manually_verified | boolean (default false) |
-| parsed_data | jsonb |
-| parsed_at / needs_refresh_by | timestamptz / date |
-| is_active | boolean (default true) |
-| created_at / updated_at | timestamptz |
-
-Row count: 139 rows (confirmed 2026-06-02).
-
----
-
-### 1I. Perplexity P16–P18 Tables (migrations 037–040)
-
-These four tables are populated by `kitevurse_perplexity_parser.py` after P9/P16/P17/P18 research runs using the v5 collector. All have RLS public read. All were populated for all 25 active destinations as of 2026-05-28.
-
----
-
-**destination_wind_seasons** — Per-season wind profile per destination (P9 output) (48 rows)
-
-One row per wind season. Parser strategy: DELETE auto-generated rows (manually_verified=false) then INSERT fresh rows from P9 JSON. P9 also continues to update `destination_conditions` (the single-averaged profile is preserved for backwards compatibility).
-
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| destination_id | uuid FK → destinations |
-| season_name | text NOT NULL (e.g. "Kusi", "Trade Wind", "Summer") |
-| local_name | text (local name if one exists) |
-| months | smallint[] (e.g. {6,7,8,9,10}) |
-| avg_wind_knots_low | smallint |
-| avg_wind_knots_high | smallint |
-| wind_direction | text (compass e.g. "SE", "NE") |
-| wind_angle_degrees | smallint (0–359, meteorological FROM) |
-| shore_angle | text (e.g. "cross-onshore", "side-shore") |
-| rideable_days_per_week_low | smallint |
-| rideable_days_per_week_high | smallint |
-| kite_sizes_70kg | text[] (e.g. {"9m","11m","13m"}) |
-| chop | text (e.g. "low", "choppy") |
-| honest_take | text (1-2 sentence plain-language description) |
-| data_source | text (default 'perplexity') |
-| manually_verified | boolean (default false) |
-| parsed_at / needs_refresh_by | timestamptz / date |
-| created_at / updated_at | timestamptz |
-
-Row count: 48 rows (confirmed 2026-06-02).
-
----
-
-**kite_schools** — ⚠️ DROPPED (migration 044, 2026-05-28) — data merged into `schools`.
-
-~~Kite school lesson/amenity intel per destination (P16 output) (113 rows)~~ All data merged into `schools` via migration 042, deduped via migration 043, table dropped via migration 044. P16 Perplexity parser writes to `schools` going forward, not `kite_schools`.
-
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| destination_id | uuid FK → destinations |
-| school_name | text NOT NULL |
-| iko_certified | boolean (default false) |
-| price_per_hour_usd | numeric(8,2) |
-| equipment_included | boolean (default true) |
-| beginner_friendliness | smallint CHECK (1–5) |
-| website | text |
-| languages | text[] |
-| accommodation_packages | boolean (default false) |
-| lesson_packages | jsonb ({beginner, intermediate, advanced} text descriptions) |
-| data_source | text (default 'perplexity_sonar_pro') |
-| manually_verified | boolean (default false) |
-| parsed_data / parsed_at / needs_refresh_by | jsonb / timestamptz / date |
-| created_at / updated_at | timestamptz |
-
-Row count: 112 rows (confirmed 2026-05-28 — table since dropped).
-
----
-
-**kite_accommodations** — Kite-community accommodation intel per destination (P17 output) (141 rows)
-
-One row per property. Captures which properties kiters actually stay at, proximity to launch, gear storage, and kite package availability. Parser strategy: DELETE auto-generated rows then INSERT from P17 JSON.
-
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| destination_id | uuid FK → destinations |
-| property_name | text NOT NULL |
-| distance_to_launch_m | integer (metres from property to main kite launch) |
-| gear_storage | boolean (default false) |
-| community_favourite | boolean (default false — repeatedly cited by kiters in forums/groups) |
-| price_per_night_usd_low | integer (budget / cheapest room) |
-| price_per_night_usd_high | integer (best / most expensive room) |
-| kite_packages | boolean (default false — bundled lesson + stay deals) |
-| beach_access | boolean (default false — direct beach access from property) |
-| website | text |
-| data_source | text (default 'perplexity_sonar_pro') |
-| manually_verified | boolean (default false) |
-| parsed_data / parsed_at / needs_refresh_by | jsonb / timestamptz / date |
-| created_at / updated_at | timestamptz |
-
-Row count: 141 rows (confirmed 2026-06-02).
-
----
-
-**kite_gear_services** — Gear rental operators and repair shops per destination (P18 output) (161 rows)
-
-One row per operator/shop. `service_type` = 'rental' or 'repair'. Destination-level `stranded_risk` (low/medium/high) is stored on every row for that destination. Parser strategy: DELETE auto-generated rows then INSERT from P18 JSON.
-
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| destination_id | uuid FK → destinations |
-| operator_name | text NOT NULL |
-| service_type | text NOT NULL CHECK ('rental' / 'repair') |
-| brands | text[] (rental only — e.g. {'Duotone','Cabrinha'}) |
-| fleet_condition | text (rental only — 'excellent'/'good'/'fair'/'poor') |
-| foil_available | boolean (rental only — default false) |
-| price_per_day_usd | integer (rental only — all-in daily rate) |
-| repairs_offered | text[] (repair only — e.g. {'bladder','canopy','bar/lines','board'}) |
-| turnaround_days | integer (repair only — typical turnaround) |
-| bars_available | boolean (repair only — replacement bars/lines for sale) |
-| stranded_risk | text CHECK ('low'/'medium'/'high') — same value on all rows for a destination |
-| stranded_risk_notes | text |
-| website | text |
-| data_source | text (default 'perplexity_sonar_pro') |
-| manually_verified | boolean (default false) |
-| parsed_data / parsed_at / needs_refresh_by | jsonb / timestamptz / date |
-| created_at / updated_at | timestamptz |
-
-Row count: 161 rows (confirmed 2026-06-02).
-
----
-
-**destination_daily_living** — Practical daily-life logistics per destination (P19 output) (25 rows)
-
-One row per destination. UPSERT on `destination_id`. Covers payment methods, transport, language, SIM cards, water/food safety, dress codes, and tipping. `supermarkets` column is always null (reserved for future sourcing).
-
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| destination_id | uuid FK → destinations (UNIQUE) |
-| payment_app_name | text |
-| payment_app_tourist_ok | boolean |
-| payment_app_how_to | text |
-| usd_accepted | boolean |
-| card_reliability | text |
-| atm_availability | text |
-| transport_primary | text |
-| transport_price_range | text |
-| transport_negotiate | boolean |
-| ride_app_available | text |
-| board_bag_transport | text |
-| car_rental | text |
-| english_sufficient | boolean |
-| english_notes | text |
-| key_phrases | jsonb (array of {phrase, meaning, why_it_matters}) |
-| sim_worth_it | boolean |
-| sim_carrier | text |
-| sim_where_to_buy | text |
-| tap_water_safe | boolean |
-| food_safety_notes | text |
-| supermarkets | jsonb (always null — reserved for future sourcing) |
-| beach_dress | text |
-| offbeach_dress | text |
-| cultural_context | text |
-| bargaining | text |
-| photography_notes | text |
-| tip_restaurant_pct | integer |
-| tip_service_providers | text |
-| tipping_importance | text |
-| data_source | text (default 'perplexity_sonar_pro') |
-| manually_verified | boolean (default false) |
-| needs_refresh_by | date |
-| created_at / updated_at | timestamptz |
-
-Row count: 25 rows (confirmed 2026-06-02).
-
----
-
-### 1J. Supporting Tables
-
-**destination_media** — Hero images and photos stored in Supabase Storage.
-Key columns: id, destination_id (text — FK joins via `d.destination_id` not `d.id`), image_url, is_hero, created_at.
-
-**airports** — 1,176 large airports + 5 destination-only airports.
-airport_iata CHAR(3) FK added to destinations table.
-
-**research_staging** — Research pipeline staging table (exists in live_table_coverage view). (837 rows)
-Key columns: destination_slug (text), prompt_id, prompt_name, status (pending_review/approved/parsed/rejected), raw_response, collected_at.
-
-**destination_fitness_summary** — (25 rows)
-
-**destination_fitness_facilities** — (287 rows)
+**saved_trips** (migration 045 — not applied) — see Auth Architecture section above for schema.
 
 ---
 
@@ -1424,818 +715,241 @@ Key columns: destination_slug (text), prompt_id, prompt_name, status (pending_re
 ---
 
 **explore_destinations_multi_sport_v1** (migration 011)
-
-```
 Parameters: input_month int, input_sports text[], input_region text, input_skill_level text
-Returns: table of destination cards (23 columns)
-SECURITY DEFINER: ✅ (required — reads RLS-protected normalized tables)
-Status: Working ✅
-```
-
-Returns destination cards sorted by `destination_strength_score DESC`. Score = season(35%) + wind_reliability(25%) + sport(25%) + confidence(10%) + data_status(5%).
-
-Reads from: `destination_conditions`, `destination_sports`, `destination_budget`, `destination_editorial`, `destination_meta`, `destination_media`.
-
-Frontend: `src/hooks/useExploreDestinations` → Explore page. Only returns `is_active = true` destinations.
+Returns: destination cards (23 columns), sorted by destination_strength_score DESC
+SECURITY DEFINER: ✅ | Status: Working ✅
 
 ---
 
-**get_destination_detail_by_slug_v1** (migration 006, supabase/migrations version)
-
-```
+**get_destination_detail_by_slug_v1** (migration 006)
 Parameters: input_slug text
 Returns: single row with ~57 aliased fields
-SECURITY DEFINER: ✅
-Status: Working ✅
-```
+SECURITY DEFINER: ✅ | Status: Working ✅
 
-Reads from: `destinations`, `destination_conditions`, `destination_sports`, `destination_safety`, `destination_transport`, `destination_budget`, `destination_lifestyle`, `destination_infrastructure`, `destination_tides`, `destination_gear`, `destination_editorial`, `destination_media`.
-
-⚠️ All field names are **aliased** — never use raw DB column names. See CLAUDE-REFERENCE.md alias table.
-
-Frontend: `DestinationDetail.tsx`.
+⚠️ All field names are ALIASED — never use raw DB column names.
 
 ---
 
 **get_schools_by_destination_v1**
-
-```
 Parameters: input_slug text
-Returns: table of school records
-SECURITY DEFINER: ✅
-Status: Working ✅ (verified on dakhla-morocco, kalpitiya-sri-lanka)
-```
-
-Joins schools to destinations via `destination_id` (schools table has no destination_slug column).
-Sort: kv_pick DESC, manually_verified DESC, (rescue+rental+storage count) DESC, school_name ASC.
-
-Frontend: `DestinationDetail.tsx` (Section 02 On The Water).
+Returns: table of school records, sorted kv_pick DESC, manually_verified DESC, capability_count DESC, name ASC
+SECURITY DEFINER: ✅ | Status: Working ✅
 
 ---
 
 **get_fitness_by_destination_v1** (migration 012)
-
-```
 Parameters: input_slug text
-Returns: table (one row per facility; facility columns NULL if none exist)
-SECURITY DEFINER: ✅
-Status: Working ✅
-```
-
-Joins: `destination_fitness_summary` + `destination_fitness_facilities` via destination_id. Returns summary fields repeated on every row + one facility per row. Sort: priority ASC, distance_from_spot_km ASC. Only returns `is_active = true` destinations.
-
-Frontend: `FitnessSection.tsx` via `useFitnessFacilities` hook.
-
----
-
-### Data Ingestion RPCs
-
----
-
-**ingest_open_meteo** (migration 021)
-
-```
-Parameters: input_slug TEXT, year_data JSONB ([{month, wind_knots, air_temp_c, rainfall_mm}])
-Returns: TABLE(destination_name TEXT, months_upserted INT, status TEXT)
-SECURITY DEFINER: ✅
-Permissions: authenticated, service_role
-```
-
-Upserts 12 rows into `open_meteo_raw`. Writes 1 audit row to `social_intel_staging` (status='approved'). Uses pgcrypto digest() — requires `SET search_path = public, extensions`.
-
-Called by: `fetch-open-meteo` Edge Function.
-
----
-
-**ingest_google_places** (migration 022)
-
-```
-Parameters: input_slug TEXT, input_category TEXT, places JSONB
-Returns: TABLE(destination_name TEXT, places_upserted INT, status TEXT)
-SECURITY DEFINER: ✅
-Permissions: authenticated, service_role
-```
-
-Note: parameter is `input_category` (not `category`) to avoid plpgsql ambiguity with `google_places_raw.category` column.
-
-Upserts rows into `google_places_raw`. Writes 1 staging row to `social_intel_staging` (status='pending' — requires admin review). Uses pgcrypto digest() for sha256 dedup.
-
-Called by: `search-google-places` Edge Function.
-
----
-
-**ingest_reddit_posts** (migration 020 — final architecture)
-
-```
-Parameters: input_slug TEXT, posts JSONB ([{raw_post_text, post_url, author, posted_at}])
-Returns: TABLE(destination_name TEXT, new_posts_count INT, status TEXT)
-SECURITY DEFINER: ✅
-Permissions: authenticated, service_role
-```
-
-Write-only RPC. No HTTP calls (previous pg_net approach in migrations 013–018 was incorrect and superseded by migration 019). Edge Function owns HTTP; this RPC owns DB. Deduplicates via SHA-256 hash. Inserts into `social_intel_staging` (status='pending').
-
-Called by: `ingest-reddit` Edge Function.
-
----
-
-**ingest_seabreeze_data** (migration 023)
-
-```
-Parameters: input_slug TEXT, threads JSONB
-Returns: TABLE(destination_name TEXT, threads_upserted INT, status TEXT)
-SECURITY DEFINER: ✅ (inferred — writes to RLS-protected table)
-```
-
-Upserts threads into `seabreeze_raw`. Writes staging audit row (status='pending', confidence 7.5).
-
-Called by: `scrape-seabreeze-forums` Edge Function.
-
----
-
-**ingest_rome2rio_data** (migration 027)
-
-```
-Parameters: input_slug TEXT, routes JSONB
-Returns: TABLE(...)
-SECURITY DEFINER: ✅ (inferred)
-```
-
-Upserts routes into `rome2rio_raw`. Writes staging row (status='pending', confidence 7.0).
-
-Called by: `scrape-rome2rio-transport` Edge Function.
-
----
-
-**ingest_noaa_copernicus_data** (migration 028)
-
-```
-Parameters: input_slug TEXT, monthly_data JSONB
-Returns: TABLE(...)
-SECURITY DEFINER: ✅ (inferred)
-```
-
-Upserts 12 monthly rows into `noaa_copernicus_raw`. Writes staging row (status='approved', confidence 9.0).
-
-Called by: `ingest-noaa-copernicus-data` Edge Function.
+Returns: table (destination_fitness_summary + destination_fitness_facilities)
+SECURITY DEFINER: ✅ | Status: Working ✅
 
 ---
 
 ### Admin Review Queue RPCs
 
----
+get_pending_social_intel_v1, approve_social_intel_row_v2 (3 params: p_id, p_excluded_indices, p_custom_venues), reject_social_intel_row, flag_social_intel_row, get_all_destinations_for_admin, add_manual_venue_v1
 
-**get_pending_social_intel_v1** (migration 029b — safe JSON cast fix)
-
-```
-Parameters: p_source TEXT DEFAULT NULL, p_limit INT DEFAULT 50, p_offset INT DEFAULT 0
-Returns: TABLE(id, source, destination_id, destination_slug, destination_name, category, item_count, confidence_score, post_url, admin_notes, created_at, ...)
-SECURITY DEFINER: NOT FOUND — needs investigation
-```
-
-Returns pending rows from `social_intel_staging` with destination info. Includes safe JSON cast guards (CASE WHEN raw_post_text LIKE '{%' guard) to handle non-JSON rows without throwing.
-
-Used by: `SocialIntelReviewQueue.tsx`.
+See previous reference version for full parameter signatures.
 
 ---
 
-**approve_social_intel_row** (migration 029 — original v1)
+### Data Ingestion RPCs
 
-```
-Parameters: p_id UUID
-Returns: JSON
-SECURITY DEFINER: ✅ (required — social_intel_staging has is_admin RLS)
-```
+ingest_open_meteo, ingest_google_places, ingest_reddit_posts, ingest_seabreeze_data, ingest_rome2rio_data, ingest_noaa_copernicus_data
 
-Marks staging row approved. Writes audit record to `approved_social_intel`.
-
----
-
-**approve_social_intel_row_v2** (migration 032 — current version with 3 params)
-
-```
-Parameters: p_id UUID, p_excluded_indices INT[] DEFAULT NULL, p_custom_venues JSONB DEFAULT NULL
-Returns: JSON
-SECURITY DEFINER: ✅
-```
-
-Allows excluding individual venues from a Google Places batch before approval. Custom venues are appended to the kept venues. `places_fetched` updated to reflect (kept scraped venues) + (manually added venues). Seabreeze rows: exclusions safely ignored (no venue array).
-
-Migration 031 created the 2-param version. Migration 032 dropped that and recreated with 3 params.
-
-Used by: `SocialIntelReviewQueue.tsx`.
-
----
-
-**reject_social_intel_row** (migration 029)
-
-```
-Parameters: p_id UUID, p_reason TEXT DEFAULT NULL
-Returns: JSON
-SECURITY DEFINER: ✅
-```
-
----
-
-**flag_social_intel_row** (migration 029)
-
-```
-Parameters: p_id UUID, p_note TEXT
-Returns: JSON
-SECURITY DEFINER: ✅
-```
-
----
-
-**get_all_destinations_for_admin** (migration 033)
-
-```
-Parameters: none
-Returns: TABLE(id UUID, name TEXT, country TEXT)
-SECURITY DEFINER: ✅
-```
-
-Returns all 101 destinations (active + inactive) for the Add Venue modal dropdown. Sorted by country → town.
-
-Used by: `Admin.tsx` New Venue modal.
-
----
-
-**add_manual_venue_v1** (migration 033)
-
-```
-Parameters: input_destination_id UUID, input_category TEXT, input_place_name TEXT, input_address TEXT, input_phone TEXT, input_website TEXT, input_rating NUMERIC, input_price_level INT, input_google_maps_url TEXT, input_hours TEXT
-Returns: JSON
-SECURITY DEFINER: ✅ (google_places_raw has RLS)
-```
-
-Writes a single venue row directly to `google_places_raw`, bypassing `social_intel_staging`. For admin-added venues from personal knowledge (no review queue needed — Dan would have to approve his own entries).
-
-Used by: `Admin.tsx` New Venue modal.
+See previous reference version for full parameter signatures.
 
 ---
 
 ## 3. SUPABASE EDGE FUNCTIONS
 
-All functions in `supabase/functions/`. All deployed with `--no-verify-jwt` (internal pipeline tools). Service role key env var: `SERVICE_ROLE_KEY` (not `SUPABASE_SERVICE_ROLE_KEY` — Supabase blocks that prefix for custom secrets).
+### generate-trip-plan (CURRENT — 10-11 calls, to be rebuilt in Phase 3)
 
----
+File: `supabase/functions/generate-trip-plan/index.ts`
+Purpose: Main trip plan generator — streams 10-11 Claude API calls simultaneously
+Model: `claude-sonnet-4-6`
+Output: NDJSON stream — one line per section
 
-### generate-trip-plan
+Current call map (10-11 calls):
+overview, on_the_water, visa, flights, getting_around, accommodation, budget, day_structure, pack (⚠️ NOT `packing`), reality_check, day_structure_expanded (conditional on nights > 3)
 
-**File:** `supabase/functions/generate-trip-plan/index.ts`  
-**Purpose:** Main trip plan generator — streams 10–11 Claude API calls simultaneously via custom `fireAndQueue` pattern.  
-**Inputs:** POST body with destination slug + user modal inputs (nationality, skill level, gear situation, who's travelling, accommodation type, achievement goals, top priority, trip dates/length).  
-**Outputs:** NDJSON stream — one line per section as calls complete (fastest first). Sections identified by `id` field.  
-**External APIs:** Anthropic Claude API (`claude-sonnet-4-6`), streaming mode.  
-**DB tables read:** All destination fields via `get_destination_detail_by_slug_v1` RPC. Schools via `get_schools_by_destination_v1`.  
-**DB tables written:** None (read-only at request time).  
+⚠️ Section ID is `pack` NOT `packing`. Do not change this — it was a previously fixed bug.
 
-Call Map:
+Phase 3 target: rebuild to 3 calls (verdict, on_the_water_narrative, lifestyle_narrative) all firing in parallel, under 10 seconds total. **Do not rebuild until trip plan output page is designed.**
 
-| Call | Section ID | Max Tokens |
-|------|-----------|-----------|
-| 1 | `overview` | 700 |
-| 2 | `on_the_water` | 800 |
-| 3 | `visa` | 600 |
-| 4 | `flights` | 700 |
-| 5 | `getting_around` | 600 |
-| 6 | `accommodation` | 800 |
-| 7 | `budget` | 800 |
-| 8 | `day_structure` (3 days) | 1200 |
-| 9 | `pack` | 600 |
-| 10 | `reality_check` | 600 |
-| 11 | `day_structure_expanded` (Day 4+, conditional on totalNights > 3) | 2000 |
+### Other Edge Functions (unchanged from previous version)
 
-⚠️ Section ID is `pack` — NOT `packing`. Frontend renders by matching on `id`.
+extract-social-intel, ingest-reddit, fetch-open-meteo, parse-open-meteo, search-google-places, parse-google-places, scrape-seabreeze-forums, scrape-rome2rio-transport, ingest-noaa-copernicus-data, classify-facebook-posts, post-facebook-comments
 
----
-
-### extract-social-intel
-
-**File:** `supabase/functions/extract-social-intel/index.ts`  
-**Purpose:** Parses raw social posts into structured intelligence using Claude API.  
-**Inputs:** POST `{ destination: string, source: string, posts: [{ raw_text, post_url, author, posted_at }] }`. Max 50 posts.  
-**Outputs:** JSON array of `IntelligenceResult` objects.  
-**External APIs:** Anthropic Claude API (`claude-sonnet-4-6`, max_tokens=500, temperature=0.2).  
-**DB tables read:** None.  
-**DB tables written:** None (caller writes to DB).  
-
-Claude extraction fields: intelligence_type, wind_knots, conditions, hazard_flags, rating, review_text, condition_type, severity, sentiment, confidence (0–100), key_quote.
-
----
-
-### ingest-reddit
-
-**File:** `supabase/functions/ingest-reddit/index.ts`  
-**Purpose:** Fetches Reddit posts via RSS/Atom feed for r/kiteboarding, r/wingfoiling, r/kitesurfing. Calls `ingest_reddit_posts` RPC to dedup and store.  
-**Inputs:** POST `{ destination_slug: string }`  
-**Outputs:** JSON with destination_name, new_posts_count, status.  
-**External APIs:** Reddit RSS/Atom (public, no auth). Subreddits: kiteboarding, wingfoiling, kitesurfing.  
-**DB tables written:** `social_intel_staging` (via `ingest_reddit_posts` RPC, status='pending').  
-
-⚠️ Reddit blocks cloud IPs (AWS, Vercel, Supabase). This function may 403 from hosted environment. Decision: skip Reddit for Phase 1 (DECISION 5).  
-Uses regex-based XML parsing — no external library dependency. Max 100 posts. 90-day lookback window.
-
----
-
-### fetch-open-meteo
-
-**File:** `supabase/functions/fetch-open-meteo/index.ts`  
-**Purpose:** Fetches daily historical weather from Open-Meteo archive API, aggregates to monthly, writes to DB.  
-**Inputs:** POST `{ destination_slug: "dakhla-morocco" }` or `{ destination_slug: "all" }`  
-**Outputs:** JSON with fetch summary per destination.  
-**External APIs:** `https://archive-api.open-meteo.com/v1/archive` (free, no auth). Parameters: wind_speed_10m_max, temperature_2m_mean, rain_sum (daily data, wind_speed_unit=kn).  
-**DB tables read:** `destinations` (latitude, longitude).  
-**DB tables written:** `open_meteo_raw` (12 monthly rows), `social_intel_staging` (1 audit row, status='approved') — both via `ingest_open_meteo` RPC.  
-
-Note: Uses daily data (366 rows) aggregated to monthly in-function — the archive API's monthly aggregation doesn't support wind_speed_10m_max. 120ms delay between destinations.
-
----
-
-### parse-open-meteo
-
-**File:** `supabase/functions/parse-open-meteo/index.ts`  
-**Purpose:** Read-only — queries `open_meteo_raw` and outputs NDJSON for verification.  
-**Inputs:** POST `{}` or `{ destination_slug: string, year: number }`  
-**Outputs:** NDJSON — one line per destination with monthly + annual aggregates.  
-**External APIs:** None.  
-**DB tables read:** `open_meteo_raw`.  
-**DB tables written:** None.
-
----
-
-### search-google-places
-
-**File:** `supabase/functions/search-google-places/index.ts`  
-**Purpose:** Fetches venue data from Google Places Text Search API (v1) for 11 categories per destination.  
-**Inputs:** POST `{ destination_slug: string }` or `{ destination_slug: "all" }`  
-**Outputs:** JSON with category fetch summary.  
-**External APIs:** `https://places.googleapis.com/v1/places:searchText`. Env var: `GOOGLE_PLACES_API_KEY`. Cost: ~$0.032/search (Advanced fields). 11 categories × 25 destinations = ~$8.80/full run.  
-**DB tables read:** `destinations` (town, country).  
-**DB tables written:** `google_places_raw` (upsert), `social_intel_staging` (status='pending') — via `ingest_google_places` RPC.  
-
-200ms delay between category calls. maxResultCount: 10.
-
----
-
-### parse-google-places
-
-**File:** `supabase/functions/parse-google-places/index.ts`  
-**Purpose:** Read-only — queries `google_places_raw` and outputs NDJSON for verification.  
-**Inputs:** POST `{}` or `{ destination_slug: string, category?: string }`  
-**Outputs:** NDJSON — one line per venue.  
-**External APIs:** None.  
-**DB tables read:** `google_places_raw`.  
-**DB tables written:** None.
-
----
-
-### scrape-seabreeze-forums
-
-**File:** `supabase/functions/scrape-seabreeze-forums/index.ts`  
-**Purpose:** Scrapes Seabreeze.com.au forums for wind conditions, hazards, and community insights per destination.  
-**Inputs:** POST `{ destination_slug: string }` or `"all"`  
-**Outputs:** JSON with scrape summary.  
-**External APIs:** `seabreeze.com.au` (HTML scraping via Cheerio). Rate limit: 1 req/sec with exponential backoff.  
-**DB tables written:** `seabreeze_raw`, `social_intel_staging` (status='pending', confidence 7.5) — via `ingest_seabreeze_data` RPC.  
-
-Note: Uses forum search rather than spot-specific pages because most KiteVurse destinations are international (Seabreeze is primarily Australian). Uses spot mapping JSON for coverage type. NEVER calls Claude API.
-
----
-
-### scrape-rome2rio-transport
-
-**File:** `supabase/functions/scrape-rome2rio-transport/index.ts`  
-**Purpose:** Fetches ground transport routes from Rome2Rio for KiteVurse destinations.  
-**Inputs:** POST `{ destination_slug: string }` or `"all"`  
-**Outputs:** JSON with transport summary.  
-**External APIs:** `rome2rio.com` (HTML scraping). Primary: `__NEXT_DATA__` JSON extraction (Next.js SSR). Fallback: CSS selectors. 2s between requests + exponential backoff.  
-**DB tables written:** `rome2rio_raw`, `social_intel_staging` — via `ingest_rome2rio_data` RPC.  
-
-Route types: airport_to_destination, local_transport, inter_destination. NEVER calls Claude API.
-
----
-
-### ingest-noaa-copernicus-data
-
-**File:** `supabase/functions/ingest-noaa-copernicus-data/index.ts`  
-**Purpose:** Fetches monthly wave + SST climatology from Open-Meteo Marine API (ERA5 backing data).  
-**Inputs:** POST `{ destination_slug: string }` or `"all"`  
-**Outputs:** JSON with ingest summary.  
-**External APIs:** `https://marine-api.open-meteo.com/v1/marine` (free, no auth). Fields: wave_height_max, wave_direction_dominant, wave_period_max (daily), sea_surface_temperature (hourly → monthly mean). Year: 2024.  
-**DB tables read:** `destinations` (latitude, longitude).  
-**DB tables written:** `noaa_copernicus_raw` (12 monthly rows), `social_intel_staging` (status='approved', confidence 9.0) — via `ingest_noaa_copernicus_data` RPC.  
-
-200ms between destinations. NEVER calls Claude API.
-
----
-
-### classify-facebook-posts
-
-**File:** `supabase/functions/classify-facebook-posts/index.ts`  
-**Purpose:** Classifies raw Facebook posts using Claude API, stages draft comments in `approval_queue` for manual review.  
-**Inputs:** POST `{ posts: [...] }` (from Apify webhook) OR `{ post_ids: [...] }` (UUIDs from facebook_posts table).  
-**Outputs:** JSON with queue summary.  
-**External APIs:** Anthropic Claude API (relevance scoring, draft comment generation). Assigns relevance_score (1–10), category, tone. Returns validated JSON.  
-**DB tables read:** `facebook_posts` (when post_ids mode).  
-**DB tables written:** `approval_queue` (primary, status='pending'), `facebook_engagement_queue` (secondary audit trail, non-blocking).  
-
-Duplicate post_ids skipped unless `force_reprocess=true`.
-
----
-
-### post-facebook-comments
-
-**File:** `supabase/functions/post-facebook-comments/index.ts`  
-**Purpose:** Posts approved comments to Facebook via Graph API. Marks rows as 'posted'.  
-**Inputs:** POST `{}` (queries pending approved items internally).  
-**Outputs:** JSON with post summary.  
-**External APIs:** Facebook Graph API v20.0. Env vars: `FACEBOOK_USER_TOKEN` (personal access token with publish_to_groups permission).  
-**DB tables read:** `approval_queue` (WHERE queue_type='facebook' AND approval_status IN ('approved', 'edited') AND posted_at IS NULL).  
-**DB tables written:** `approval_queue` (sets approval_status='posted'). Requires migration 026 ('posted' added to CHECK constraint).  
-
-Text priority: `your_edits` (Danny's edits) → `draft_text` (original Claude draft).
+See previous reference version for full documentation.
 
 ---
 
 ## 4. MIGRATION HISTORY
 
 ### Root Folder (`migrations/`) — All Applied ✅
+001-006 applied. See previous reference version.
+
+### Supabase Folder (`supabase/migrations/`) — Applied Status
+
+Migrations 006-036 applied. See previous reference version for full list.
 
 | File | Description | Status |
-|------|-------------|--------|
-| `001_create_normalized_tables.sql` | Created all 10 normalized destination tables + indexes | ✅ Applied |
-| `002_migrate_data.sql` | Copied data from destinations → 10 normalized tables. ⚠️ Ran 4× — DISTINCT ON in RPC CTEs deduplicates | ✅ Applied |
-| `003_create_rpc_v2.sql` | Created `get_destination_detail_by_slug_v2` (not used by frontend) | ✅ Applied |
-| `004_add_nowind_columns.sql` | Added no-wind structured columns to destinations | ✅ Applied |
-| `005_create_fitness_tables.sql` | Created `destination_fitness_summary` and `destination_fitness_facilities` tables | ✅ Applied |
-| `006_rewrite_v1_to_join_normalized.sql` | Rewrote `get_destination_detail_by_slug_v1` to join normalized tables | ✅ Applied (superseded by supabase/migrations/006) |
+|---|---|---|
+| `037_destination_wind_seasons.sql` | Created `destination_wind_seasons` table (seasonal wind data, replaces single-row conditions approach). Public read RLS. Populated for all 25 active destinations. | ✅ Applied |
+| `038–043` | Intermediate migrations (content varies — check migration files directly) | ✅ Applied |
+| `044_drop_kite_schools.sql` | Dropped `kite_schools` table. `schools` table is the single source of truth for all school data (183 rows). | ✅ Applied |
+| `045_saved_trips.sql` | Will create `saved_trips` table for user saved trip plans. Required before auth/save feature. | 🔴 NOT YET APPLIED |
+| `049_destination_areas_display_name.sql` | Latest applied migration (as of 2026-06-03). | ✅ Applied |
 
----
-
-### Supabase Folder (`supabase/migrations/`) — Applied Status per File
-
-| File | Description | Status |
-|------|-------------|--------|
-| `006_update_rpc_v1_normalized_joins.sql` | Updated `get_destination_detail_by_slug_v1` — supersedes root/006 | ✅ Applied |
-| `011_update_explore_rpc_normalized_joins.sql` | Rewrote `explore_destinations_multi_sport_v1` to join normalized tables. Uses DISTINCT ON CTEs to handle duplicate rows. | ✅ Applied |
-| `012_add_fitness_rpc.sql` | Created `get_fitness_by_destination_v1` RPC (SECURITY DEFINER) | ✅ Applied |
-| `013_create_rpc_ingest_reddit_posts.sql` | Original ingest_reddit_posts with pg_net HTTP approach — **SUPERSEDED** by migration 019. The pg_net-within-transaction approach is architecturally incorrect. | ✅ Applied (superseded) |
-| `014_phase1_schema_update.sql` | Created coworking_spaces, culture_safety, medical_emergency tables. Added parsed_data/parsed_at/needs_refresh_by to 12 tables. Added open_meteo_data column to destination_conditions. Recreated staging_pending, staging_coverage, live_table_coverage views. | ✅ Applied |
-| `015_create_social_sourcing_tables.sql` | Created 4 social sourcing tables: social_intel_staging, wind_community_reports, accommodation_reviews, destination_condition_updates | ✅ Applied |
-| `016_update_ingest_reddit_posts_use_vault.sql` | Added Supabase Vault for API key storage (interim approach, superseded by 019) | ✅ Applied (superseded) |
-| `017_fix_ingest_reddit_posts_search_path.sql` | search_path fix for pgcrypto (superseded by 019) | ✅ Applied (superseded) |
-| `018_fix_ingest_reddit_posts_pgnet_scalar.sql` | Fixed pg_net scalar return type (superseded by 019) | ✅ Applied (superseded) |
-| `019_restructure_ingest_reddit_posts_write_only.sql` | **Correct final architecture**: write-only RPC, no HTTP. Edge Function → Reddit API → ingest_reddit_posts RPC → DB. | ✅ Applied |
-| `020_fix_ingest_reddit_posts_search_path_extensions.sql` | Added `extensions` to search_path for pgcrypto digest() | ✅ Applied |
-| `021_open_meteo_tables.sql` | Created open_meteo_raw table + ingest_open_meteo RPC (SECURITY DEFINER) | ✅ Applied |
-| `022_google_places_tables.sql` | Created google_places_raw table + ingest_google_places RPC (SECURITY DEFINER) | ✅ Applied |
-| `023_seabreeze_tables.sql` | Created seabreeze_raw table + ingest_seabreeze_data RPC | ✅ Applied |
-| `024_facebook_strategy_tables.sql` | Created facebook_posts, facebook_engagement_queue, facebook_engagement_log tables | ✅ Applied |
-| `025_universal_approval_queue.sql` | Created approval_queue table (generic queue for all manual approvals) | ✅ Applied |
-| `026_approval_queue_posted_status.sql` | Added 'posted' status to approval_queue CHECK constraint | ✅ Applied |
-| `027_rome2rio_tables.sql` | Created rome2rio_raw table + ingest_rome2rio_data RPC | ✅ Applied |
-| `028_noaa_copernicus_tables.sql` | Created noaa_copernicus_raw table + ingest_noaa_copernicus_data RPC | ✅ Applied |
-| `029_social_intel_review_rpcs.sql` | Created approved_social_intel table + get_pending_social_intel_v1, approve_social_intel_row (v1), reject_social_intel_row, flag_social_intel_row RPCs | ✅ Applied |
-| `029b_fix_safe_json_cast.sql` | Fixed `get_pending_social_intel_v1` — wrapped ::jsonb casts in CASE WHEN guards for non-JSON rows | ✅ Applied |
-| `030_kite_spots.sql` | Created kite_spots table (per-spot geographic and safety data) | ✅ Applied |
-| `030_dedup_staging.sql` | Deduped social_intel_staging (453 → 300 rows). Added partial unique index on (destination_id, source, coalesced_category) WHERE status='pending' | ✅ Applied |
-| `031_spot_regulations.sql` | Created spot_regulations table (one row per destination) | ✅ Applied |
-| `031_approve_with_exclusions.sql` | Created approve_social_intel_row_v2 (2 params: id + excluded_indices) | ✅ Applied (superseded by 032) |
-| `032_destination_kiter_logistics.sql` | Created destination_kiter_logistics table (customs, airline policy, gear transport) | ✅ Applied |
-| `032_approve_v2_custom_venues.sql` | Dropped 2-param v2, recreated approve_social_intel_row_v2 with 3 params (+ p_custom_venues JSONB) | ✅ Applied |
-| `033_add_manual_venue.sql` | Created get_all_destinations_for_admin() + add_manual_venue_v1() RPCs | ✅ Applied |
-| `034_visa_requirements_add_destination_id.sql` | Added destination_id UUID FK (nullable) to visa_requirements. Added UNIQUE(destination_id, passport_country_code). | ✅ Applied |
-| `035_ingestion_column_fixes.sql` | Added data_source/is_active to kite_spots; is_active to transportation; data_source to destination_conditions; made visa_required nullable | ✅ Applied |
-| `036_destination_areas_kite_hubs.sql` | Created `destination_areas` (P14 — neighbourhood intel, one row per area) + `kite_hubs` (P15 — kite scene hubs, one row per hub). Added `areas_recommendation`, `scene_summary`, `proximity_reality` columns to `destination_editorial`. RLS public read on both new tables. Idempotent: DROP/CREATE policies, column fixups for reruns. | ✅ Applied |
-| `037_destination_wind_seasons.sql` | Created `destination_wind_seasons` (P9 — per-season wind profile, one row per season per destination). RLS enabled, public read. Written by `parse_p9` in the parser. 48 rows across 25 destinations. | ✅ Applied |
-| `038_create_kite_schools.sql` | Created `kite_schools` (P16 — Perplexity-sourced school lesson/amenity intel). Separate from `schools` (Google Places). RLS public read. 112 rows across 25 destinations. | ✅ Applied |
-| `039_create_kite_accommodations.sql` | Created `kite_accommodations` (P17 — kite-community accommodation intel: proximity to launch, gear storage, kite packages). RLS public read. 141 rows across 25 destinations. | ✅ Applied |
-| `040_create_kite_gear_services.sql` | Created `kite_gear_services` (P18 — gear rental operators + repair shops per destination). `service_type` = 'rental'/'repair'. Includes `stranded_risk` (low/medium/high) at destination level. RLS public read. 161 rows across 25 destinations. | ✅ Applied |
-| `041_destination_daily_living.sql` | Created `destination_daily_living` (P19 — payment, transport, language, SIM, water safety, dress codes, tipping per destination). UPSERT on destination_id, one row per destination. RLS public read. 25 rows across 25 destinations. | ✅ Applied |
-| `042_merge_kite_schools_into_schools.sql` | Merged `kite_schools` into `schools`: reset all 101 kv_pick=true flags; updated websites on exact matches; inserted 96 unmatched kite_schools rows (kv_pick=false, manually_verified=false); marked kite_schools deprecated. schools: 197 rows. | ✅ Applied |
-| `043_schools_dedup_and_process_rules.sql` | (1) Added `data_source` text column to schools; (2) set data_source='perplexity' for original rows (slug IS NOT NULL), 'perplexity_p16' for migration 042 inserts; (3) copied missing websites from duplicate rows to keepers; (4) deleted 14 near-duplicate rows (keep row with notes, delete row without notes — same school, different Perplexity name normalisation); schools: 197→183 rows; (5) added `enforce_perplexity_no_insert` trigger — blocks any INSERT with data_source='perplexity'. Google Places owns inserts; Perplexity P16 does UPDATE only. | ✅ Applied |
-| `044_drop_kite_schools.sql` | Dropped `kite_schools` table. Data fully merged into `schools` (migration 042), deduped (043), table dropped in 044. No RPCs, Edge Functions, or parsers reference kite_schools any more. | ✅ Applied |
-| `048_kite_hubs_p20_row_fields.sql` | Added 17 discrete scannable-row columns to kite_hubs (sleep_type, sleep_price, sleep_near, eat_scene, eat_range, eat_note, recover_where, recover_options, recover_price, recover_note, social_crowd, social_vibe, social_connect, social_note, evening_scene, evening_access, evening_note). All 139 rows populated via extract_p20_row_fields.py. | ✅ Applied |
-| `049_destination_areas_display_name.sql` | Latest migration (as of 2026-06-02). | ✅ Applied |
-
-**⚠️ Migrations NOT Applied:**
-- `supabase/migrations/099` (if it exists) — drops source columns. DO NOT APPLY.
-- Migrations 008–010 in supabase/migrations/ — redundant. Safe to delete.
+**⚠️ Do not apply migration 045 until auth (magic link) is implemented.**
 
 ---
 
 ## 5. FRONTEND PAGES & COMPONENTS
 
-### Pages (`src/pages/`)
+### Pages (`src/pages/`) — Phase 2 State
 
 ---
 
-**Explore.tsx** — Destination discovery page
+**DestinationPage.tsx** (formerly DestinationDetail.tsx)
 
-Route: `/` (or `/explore`)  
-RPCs called: `explore_destinations_multi_sport_v1` (via `useExploreDestinations` hook)  
-Filters: month (default current), sport (default kitesurfing), region, skill level  
-Components: KVNav, ExploreBanner, ExploreFilters, ExploreResults  
-Known bugs: none active
+Route: `/destinations/:slug`
+Branch: `feat/phase2-redesign`
+Status: Partially implemented — hero, wind season tabs, my base with spine all render. Several bugs (see Phase 2 bugs section above).
 
----
+Data fetching (parallel on mount):
+```typescript
+const { data: dest } = useDestinationDetail(slug);           // RPC — normalized tables
+const { data: seasons } = useWindSeasons(dest?.destination_id);    // direct
+const { data: hubs } = useKiteHubs(dest?.destination_id);          // direct
+const { data: areas } = useDestinationAreas(dest?.destination_id); // direct
+const { data: schools } = useSchools(slug);                        // RPC
+```
 
-**DestinationDetail.tsx** — Full destination page
+Current data-testids (confirmed from live browser):
+device-frame, destination-page, back-to-explore, season-tab-0, season-tab-1, season-card, base-tab-0, base-tab-1, base-tab-2, base-card, spine-stop-gear, spine-stop-sleep, expand-toggle-sleep, spine-stop-eat, expand-toggle-eat, spine-stop-recover, expand-toggle-recover, spine-stop-social, expand-toggle-social, spine-stop-evening, expand-toggle-evening, invest-footer, plan-my-trip-cta
 
-Route: `/destinations/:slug`  
-RPCs called:
-- `get_destination_detail_by_slug_v1(slug)` — all destination data
-- `get_schools_by_destination_v1(slug)` — school cards in Section 02
-- `get_fitness_by_destination_v1(slug)` — fitness section (via useFitnessFacilities hook)
+Missing data-testids (must add): bottom-tab-bar, stats-band, hero-h1, the-catch, section-wind, section-my-base
 
-Two tabs: Destination Info + Trip Plan  
-5 numbered sections: 01 Conditions, 02 On The Water, 03 Getting There, 04 Where to Stay, 05 Daily Life  
-Components: TripPlannerModal (launches trip plan flow)  
+Page structure (current implementation):
+1. KVNav (dark, sticky)
+2. Hero zone (dark): ‹ EXPLORE, destination name H1, region/country, stats band (horizontal scroll strip, all viewports), mobile Plan My Trip CTA above Wind Season
+3. Light section: eyebrow, vibe_summary, practical_notes
+4. Wind Season section (01): tabs + season card
+5. My Base section (02): area picker + vibe text + spine (Kite Zone → Gear → Sleep → Eat → Recover → Social → Evening)
+6. Invest footer (dark): CTA
 
-Known bugs (from CLAUDE.md):
-- Schools section still rendering old card style (OnTheWaterSection)
-- Visa NDJSON chunk not rendering in GettingThereSection
-- Scooter Hire card has hardcoded `~$12/day` price
-- FROM AIRPORT card spans full width when only card in row
-
-Helper components defined inline in DestinationDetail.tsx:
-- `LightSection` — numbered section wrapper
-- `DataCard` — white info card with label/value/sub
-- `RiskBadge` — coloured pill for Low/Moderate/High/Rare/Seasonal
-
----
-
-**Admin.tsx** — Admin review dashboard
-
-Route: `/admin` (implied)  
-Two tabs: Content Queue + Social Intel  
-Components: AdminReviewQueue, SocialIntelReviewQueue  
-No RPCs called directly — components handle their own data fetching.
+Page structure (target after DESTINATION-PAGE-REQUIREMENTS.md is implemented):
+1. KVNav
+2. Hero (dark): back, name, region, stats band (visible ALL viewports), The Catch warning, Best For (green), Skip If (amber), Plan My Trip CTA
+3. Wind Season section: full-width, single-column
+4. My Base section: full-width, single-column, Social/Evening collapsed by default
+5. Invest footer
+6. BottomTabBar (mobile only, fixed)
 
 ---
 
-**TripPlan.tsx** — Trip plan output page
+**ExplorePage.tsx** (formerly Explore.tsx)
 
-Route: `/trip-plan` or similar  
-Used after TripPlannerModal submits — renders TripPlanOutput component.  
-No direct RPC calls — data comes from generate-trip-plan Edge Function stream.
-
----
-
-**JarvisDashboard.tsx** — DENNIS ops admin dashboard
-
-Route: `/admin/jarvis`  
-Auth: PIN `2601`, stored in `localStorage` as `kv_jarvis_auth` (not Supabase auth — internal tool only)  
-Display name: **DENNIS** (renamed from JARVIS in commit `197f2bb`)  
-Zero Supabase queries — all data is hardcoded placeholder content.  
-8 tabs: Overview, Agents, API Costs, Revenue, Sales, Marketing, Queue, Pro Preview  
-Cost log (API Costs tab) persists in `localStorage` as `kv_dennis_costs`. Budget tracker turns red at 80% ($40).  
-Components: 11 files in `src/components/jarvis/` (see below).
+Route: `/`
+Status: Old implementation still in place. Phase 2 redesign not yet started for this page.
 
 ---
 
-**Index.tsx** — Landing page / redirect
+**TripPlanPage.tsx** (formerly TripPlan.tsx / TripPlannerModal+Output)
 
-**NotFound.tsx** — 404 page
+Route: `/trip/:slug`
+Status: Old implementation still in place. Phase 2 intake redesign (3-step reordered) and output redesign not yet started.
 
----
-
-### Key Components (`src/components/`)
-
----
-
-**AdminReviewQueue.tsx**
-
-Purpose: Reviews Facebook, email, content, social approval queue.  
-Data: Queries `approval_queue` table directly (not via RPC). Filters by queue_type.  
-Actions: Approve, reject, edit draft text, mark as posted.
+Phase 2 intake step order (to implement):
+- Step 1 — "You": group + skill (two fun taps, fast first step)
+- Step 2 — "Your setup": weight + gear + budget (three taps)
+- Step 3 — "When": nationality + dates (commitment last, heaviest input)
 
 ---
 
-**SocialIntelReviewQueue.tsx**
+**ProfilePage.tsx** — Not yet built. Requires migration 045 + auth.
 
-Purpose: Reviews pending Google Places venues and Seabreeze threads.  
-RPCs called:
-- `get_pending_social_intel_v1` — lists pending staging rows
-- `approve_social_intel_row_v2(id, excluded_indices, custom_venues)` — approve with optional venue exclusions + manual additions
-- `reject_social_intel_row` — reject
-- `flag_social_intel_row` — flag for later
+**SharedTripView.tsx** — Not yet built.
 
-Detail view: Shows venue cards with checkboxes (checked = keep, unchecked = exclude). Inline add-venue form. Approve button shows `Approve (8 of 10)` when venues excluded.
+**Admin.tsx, JarvisDashboard.tsx** — Existing, untouched.
 
 ---
 
-**trip-planner/TripPlannerModal.tsx**
-
-Purpose: 5-step modal collecting user trip preferences.  
-Inputs collected: nationality (step 1), skill level (step 2), achievement goals (step 3), gear situation / who's travelling / accommodation type (step 4), top priority / trip dates/length (step 5).  
-On submit: calls `generate-trip-plan` Edge Function. Renders TripPlanOutput.
+### Shared Components (Phase 2)
 
 ---
 
-**trip-planner/TripPlanOutput.tsx**
+**KVNav.tsx**
+- Mobile (< 768px): 50px sticky, dark bg + blur. Logo left, profile avatar (30px circle, initials) right.
+- Tablet/Desktop (≥ 768px): 56px. Logo left, links centre (Explore · Destinations), Profile + "Plan My Trip" CTA right.
+- Logo: `font-mono text-[13px] font-semibold tracking-[0.06em]` — "Kite" white, "Vurse" accent.
 
-Purpose: Renders streaming trip plan sections.  
-Section mapping (by NDJSON `id` field):
+**BottomTabBar.tsx**
+- Mobile only (`md:hidden`). Fixed bottom-0. 62px height + safe area.
+- Tabs: EXPLORE (→ `/`), PLANNER (→ opens DestinationPickerSheet), PROFILE (→ `/profile`)
+- data-testid="bottom-tab-bar" ← MUST ADD (currently missing)
+- Active: `text-accent-deep` + `bg-accent/10` pill
 
-| id | Component |
-|----|-----------|
-| `overview` | OverviewSection |
-| `on_the_water` | OnTheWaterSection |
-| `flights` + `visa` | GettingThereSection |
-| `accommodation` | WhereToStaySection |
-| `day_structure` + `day_structure_expanded` | DayByDaySection |
-| `budget` | BudgetSection |
-| `pack` | PackingSection (⚠️ NOT `packing`) |
-| `reality_check` | RealityCheckSection (falls back to `destination.reality_check` DB field) |
-| `getting_around` | GettingAroundSection |
+**DeviceFrame.tsx**
+- See Design System section above.
+- data-testid="device-frame" already present.
 
----
+**VerdictPill.tsx** — See Design System section above.
 
-**trip-planner/TripPlanInteractive.tsx** — Trip plan interaction layer (expand/collapse sections)
-
-**trip-planner/NationalityBanner.tsx** — Nationality-based personalization banner (Call 0 output)
-
-**explore/DestinationCard.tsx** — Card component for Explore grid  
-**explore/DestinationGrid.tsx** — Grid layout for destination cards  
-**explore/ExploreFilters.tsx** — Filter bar (month, sport, region, skill level)  
-**explore/ExploreBanner.tsx** — Dark hero banner on Explore page  
-**explore/ExploreResults.tsx** — Results count + grid wrapper  
-
-**destination/FitnessSection.tsx** — Fitness section for DestinationDetail (calls get_fitness_by_destination_v1)  
-
-**jarvis/** — DENNIS ops dashboard components (all in `src/components/jarvis/`):
-
-| File | Purpose |
-|------|---------|
-| `PinEntry.tsx` | PIN lock screen (PIN: 2601, shake animation on wrong entry) |
-| `JarvisHeader.tsx` | DENNIS mono header + live clock + 4 health indicator pills |
-| `TabBar.tsx` | 8-tab horizontal scrollable nav; Pro Preview has accent left-border |
-| `OverviewTab.tsx` | 4 KPI cards + live countdown to July 1 2026 + activity log |
-| `AgentsTab.tsx` | 4 PENDING agent cards + runs table + status legend |
-| `ApiCostsTab.tsx` | Claude/Supabase/Google Places/Perplexity cost metrics + manual cost log (localStorage) + budget tracker |
-| `RevenueTab.tsx` | 4 affiliate stream cards + total MRR + chart placeholder |
-| `SalesTab.tsx` | Affiliate pipeline + B2B log + school funnel bars + outreach log |
-| `MarketingTab.tsx` | FB groups + content table + community form + SEO + calendar |
-| `QueueTab.tsx` | Community submissions + school responses side by side |
-| `ProPreviewTab.tsx` | 4 blurred/overlaid sections + $49/yr CTA card |
-
-All data is hardcoded placeholder. No Supabase queries from any jarvis component.
+**DestinationPickerSheet.tsx** — vaul Drawer. Fetches destinations directly (is_active=true). Grouped by region. Real-time client-side search.
 
 ---
 
-**KVNav.tsx / KVFooter.tsx** — Site navigation and footer  
-**NavLink.tsx / SiteFooter.tsx** — Additional nav components  
+### Trip Planner Components (Phase 2 — to be built)
 
-**ui/** — shadcn/ui library components (accordion, button, card, dialog, etc.) — do not modify unless explicitly needed.
+**TripPlanIntake** — 3-step reordered intake (see step order above)
+**TripPlanOutput** — 6-section output (Water, There & In, Sleep, Lifestyle, No Wind, Costs)
+**VerdictZone** — dark zone with VerdictPill, kite quiver, 3 reasons
+**ShareModal, SaveModal** — vaul Drawers
 
 ---
 
-## 6. DATA INGESTION STATE
+## 6. DATA INGESTION STATE (as of 2026-06-03)
 
-Data sourced from live DB query (2026-06-02T05:00:05).
+All Phase 1 data collection complete.
 
-### Normalized Tables (core destination data)
-- **101 rows each** across all 10 normalized tables
-- 25 `is_active = true` (live on Explore page)
-- 76 `is_active = false` (seeded/staged, not live)
-- No duplicates — `COUNT(DISTINCT destination_id) = 101` confirmed
-
-### social_intel_staging
-- **352 rows** (queried 2026-06-02T05:00:05)
-- 0 pending rows remaining (pending_social_intel = 0)
-- Pre-dedup: 453 rows (doubled by ingesters running 2-3×)
-- By source: 413 google_places + 39 seabreeze + 1 reddit
-
-### google_places_raw
-- **2,388 rows** confirmed (queried 2026-06-02T05:00:05)
-- Data exists for all 11 categories across active destinations
-- Admin review queue: SocialIntelReviewQueue.tsx
-
-### open_meteo_raw
-- **300 rows confirmed** — 12 rows per destination × 25 destinations
-- Fetched via `fetch-open-meteo` Edge Function using Open-Meteo archive API (free, daily data aggregated to monthly)
-- All 25 active destinations covered after coordinates were populated for 15 missing spots
-
-### noaa_copernicus_raw
-- **300 rows confirmed** — 12 rows per destination × 25 destinations
-- Fetched via `ingest-noaa-copernicus-data` Edge Function using Open-Meteo Marine API (ERA5 reanalysis)
-- Wave: hs_mean/min/max/std, tp_mean, compass direction. SST: sst_mean/min/max
-- Status in staging: `approved` (auto-approved, confidence 9.0) — does not need admin queue review
-
-### seabreeze_raw
-- **26 rows** (queried 2026-06-02T05:00:05)
-- Staging rows in social_intel_staging sourced from seabreeze
-
-### approved_social_intel
-- **300 rows** confirmed (queried 2026-06-02T05:00:05)
-
-### research_staging
-- **837 rows** (queried 2026-06-02T05:00:05)
-- Populated by Perplexity collector scripts (v1–v4). Contains raw JSON responses for P7–P15.
-- P7–P13: collected by v3 collector. P14–P15: collected by v4 collector (active, in `scripts/data-collection/`)
-- All 25 active destinations × prompts P7–P15 parsed and written to production tables (completed 2026-05-25)
-
-### destination_areas
-- **177 rows** confirmed (queried 2026-06-02T05:00:05)
-- Populated by `kitevurse_perplexity_parser.py` parse_p14 (2026-05-25)
-- `destination_editorial.areas_recommendation` also populated for all 25
-
-### kite_hubs
-- **139 rows** confirmed (queried 2026-06-02T05:00:05)
-- Populated by `kitevurse_perplexity_parser.py` parse_p15 (2026-05-25)
-- `destination_editorial.scene_summary` + `proximity_reality` populated for all 25
-- P20 hub summaries (eat, sleep, recovery, social, evening) complete for all 139 rows (missing_p20 = 0)
-- 17 discrete P20 row fields populated for all 139 rows via extract_p20_row_fields.py (migration 048, 2026-05-31)
-
-### destination_wind_seasons
-- **48 rows** confirmed (2026-06-02)
-- Populated by `kitevurse_perplexity_parser.py` parse_p9 (v5 collector run — migration 037)
-- One row per named wind season per destination (destinations with dual monsoon seasons get 2 rows)
-- Fields: season_name, months[], avg_wind_knots_low/high, wind_direction, shore_angle, rideable_days_per_week, kite_sizes_70kg, honest_take
-
-### schools (single source of truth — deduped)
-- **183 rows** (2026-06-02 — deduped from 197 via migration 043: 14 near-duplicates removed)
-- Served by `get_schools_by_destination_v1`
-- `kv_pick` = false on all rows — must be set manually by Dan (max 1 per destination)
-- **data_source breakdown:** 101 `perplexity` (original), 82 `perplexity_p16` (genuinely new from kite_schools merge), enriched rows set to `perplexity_enriched`
-- Trigger `enforce_perplexity_no_insert` (migration 043) blocks any INSERT with data_source='perplexity'
-- P16 parser now UPDATE-only — enriches certifications, lesson_price_usd_from, accommodation_available where null
-
-### kite_schools
-- **DROPPED** — migration 044 (2026-05-28). Data was merged into `schools` in migration 042, deduped in 043, table dropped in 044.
-
-### kite_accommodations
-- **141 rows** confirmed (2026-06-02)
-- Populated by `kitevurse_perplexity_parser.py` parse_p17 (P17 Kite Accommodations prompt — migration 039)
-- Kite-community accommodation intel: which properties kiters use, proximity to launch, gear storage, kite packages.
-
-### kite_gear_services
-- **161 rows** confirmed (2026-06-02)
-- Populated by `kitevurse_perplexity_parser.py` parse_p18 (P18 Gear & Repair prompt — migration 040)
-- One row per operator or repair shop. service_type = 'rental' or 'repair'. Includes destination-level stranded_risk.
-
-### destination_daily_living
-- **25 rows** confirmed (2026-06-02)
-- Populated by `kitevurse_perplexity_parser.py` parse_p19 (P19 Daily Living prompt — migration 041)
-- One row per destination (UPSERT on destination_id). Covers payment, transport, language, SIM, water/food, dress, tipping. supermarkets always null.
-
-### kite_spots
-- **117 rows** (queried 2026-06-02T05:00:05)
-
-### visa_requirements
-- **251 rows** (queried 2026-06-02T05:00:05)
-
-### sim_card_options
-- **0 rows** — not yet collected
-
-### rome2rio_raw
-- **0 rows** — not yet collected
-
-### medical_emergency
-- **0 rows** — not yet collected
-
-### wind_community_reports / accommodation_reviews / destination_condition_updates
-- **0 rows each** — not yet populated
-
-### airports
-- 1,176 large airports + 5 destination-only airports
-- All 25 active destinations wired with airport_iata FK
-
-### approval_queue
-- **6 rows** total; **4 pending** (queried 2026-06-02T05:00:05)
-
-### facebook_engagement_queue
-- **7 rows** (queried 2026-06-02T05:00:05)
-
-### nightlife_venues
-- **544 rows** (queried 2026-06-02T05:00:05)
-
-### no_wind_activities
-- **416 rows** (queried 2026-06-02T05:00:05)
-
-### recovery_services
-- **444 rows** (queried 2026-06-02T05:00:05)
-
-### restaurants
-- **623 rows** (queried 2026-06-02T05:00:05)
-
-### transportation
-- **464 rows** (queried 2026-06-02T05:00:05)
-
-### coworking_spaces
-- **274 rows** (queried 2026-06-02T05:00:05)
-
-### culture_safety
-- **25 rows** (queried 2026-06-02T05:00:05)
-
-### destination_fitness_summary
-- **25 rows** (queried 2026-06-02T05:00:05)
-
-### destination_fitness_facilities
-- **287 rows** (queried 2026-06-02T05:00:05)
+- Normalized tables: 101 rows each (25 active, 76 inactive)
+- destination_wind_seasons: 48 rows (all 25 active destinations populated)
+- destination_areas: 177 rows
+- kite_hubs: 139 rows
+- schools: 183 rows across 25 destinations
+- kite_accommodations: 141 rows
+- kite_gear_services: 161 rows
+- visa_requirements: 251 rows
+- coworking_spaces: 274 rows
+- destination_fitness_summary: 25 rows
+- destination_fitness_facilities: 287 rows
+- culture_safety: 25 rows
+- kite_spots: 117 rows
+- spot_regulations: 27 rows
+- destination_kiter_logistics: 27 rows
+- open_meteo_raw: 300 rows
+- noaa_copernicus_raw: 300 rows
+- approved_social_intel: 300 rows
+- social_intel_staging: 352 rows (0 pending approval)
+- google_places_raw: 2,388 rows
+- seabreeze_raw: 26 rows
+- nightlife_venues: 544 rows
+- no_wind_activities: 416 rows
+- recovery_services: 444 rows
+- restaurants: 623 rows
+- transportation: 464 rows
+- research_staging: 837 rows
+- destination_wifi: 8 rows
+- sim_card_options: 0 rows
+- medical_emergency: 0 rows
+- rome2rio_raw: 0 rows
+- wind_community_reports: 0 rows
+- accommodation_reviews: 0 rows
+- destination_condition_updates: 0 rows
+- approval_queue: 6 rows (4 pending)
+- facebook_engagement_queue: 7 rows
 
 ---
 
@@ -2243,28 +957,43 @@ Data sourced from live DB query (2026-06-02T05:00:05).
 
 ### Active Supabase Project: `xthaiitjoccrrqivjlor`
 
-| Env Var | Purpose | Status |
-|---------|---------|--------|
-| `VITE_KITEVERSE_SUPABASE_URL` | Active Supabase project URL | ✅ Use this |
-| `VITE_KITEVERSE_SUPABASE_ANON_KEY` | Active anon key (publishable) | ✅ Use this |
+| Env Var | Purpose |
+|---------|---------|
+| `VITE_KITEVERSE_SUPABASE_URL` | Active project URL |
+| `VITE_KITEVERSE_SUPABASE_ANON_KEY` | Active anon key (frontend only) |
 
-### Legacy Supabase Project: `ouqqfpqsbaijbinpyiio` — DO NOT USE FOR NEW WORK
+### Legacy: `ouqqfpqsbaijbinpyiio` — DO NOT USE
 
-| Env Var | Purpose | Status |
-|---------|---------|--------|
-| `VITE_SUPABASE_URL` | Old project URL | ❌ Legacy |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | Old anon key | ❌ Legacy |
-| `VITE_SUPABASE_PROJECT_ID` | Old project ID | ❌ Legacy |
+### Tech Stack (confirmed from package.json 2026-05-29)
 
-### Edge Function Secrets (set in Supabase Vault / Edge Function env)
+| Library | Version | Notes |
+|---|---|---|
+| React | 18.3.1 | |
+| TypeScript | 5.8.3 | |
+| Vite | 5.4.19 | |
+| react-router-dom | 6.30.1 | React Router v6 |
+| @tanstack/react-query | 5.83.0 | v5 — all data fetching |
+| tailwindcss | 3.4.17 | **v3 NOT v4** |
+| @supabase/supabase-js | 2.105.3 | |
+| vaul | 0.9.9 | All bottom sheets |
+| sonner | 1.7.4 | All toasts |
+| lucide-react | 0.462.0 | Icons |
+| recharts | 2.15.4 | Charts (costs section) |
+| date-fns | 3.6.0 | Date utilities |
+| Vitest | 3.2.4 | Unit tests |
+| Playwright | 1.60.0 | E2E tests |
+| @testing-library/react | 16.0.0 | Component tests |
 
-| Secret | Used By |
-|--------|---------|
-| `SERVICE_ROLE_KEY` | All write Edge Functions (NOT `SUPABASE_SERVICE_ROLE_KEY` — blocked prefix) |
-| `SUPABASE_URL` | Edge Functions needing the project URL |
-| `GOOGLE_PLACES_API_KEY` | search-google-places |
-| `FACEBOOK_USER_TOKEN` | post-facebook-comments |
-| `ANTHROPIC_API_KEY` | generate-trip-plan, extract-social-intel, classify-facebook-posts |
+All Radix UI primitives and shadcn/ui components are installed. Use them — don't install alternatives.
+
+### Dev Environment
+
+```
+Repo:        C:\Users\danwi\kite-explorer
+Dev server:  localhost:8080 (npm run dev)
+Branch:      feat/phase2-redesign
+Shell:       PowerShell (never use &&)
+```
 
 ### Design Tokens
 
@@ -2272,89 +1001,109 @@ Data sourced from live DB query (2026-06-02T05:00:05).
 Page bg:        #f6f4ef
 Dark bg:        #0a0e14
 Accent:         #2DABE5
+Accent deep:    #006194
 Primary text:   #0a0e14
 Muted text:     #6b7a8d
-Inverted text:  #e8eaed
-Green stat:     #7ed3a2
+Label text:     #54606c
+Inverted:       #e8eaed
+Green:          #7ed3a2
+Amber:          #d99a3a
 Border light:   rgba(10,14,20,0.09)
 Border dark:    rgba(255,255,255,0.08)
 ```
-
-Fonts: `'Inter Tight', system-ui, sans-serif` (display/headings). `'JetBrains Mono', 'Courier New', monospace` (labels/numbers/eyebrows).
-
-### Dev Server
-
-`npm run dev` → `localhost:8080`
 
 ---
 
 ## APPENDIX: Critical Rules Summary
 
-1. **SECURITY DEFINER** — every RPC that reads from RLS-protected normalized tables must declare `SECURITY DEFINER` and `SET search_path = public`. Without it: returns all nulls/zeros with no error.
+1. **SECURITY DEFINER** — every RPC reading RLS-protected normalized tables must declare SECURITY DEFINER + `SET search_path = public`. Without it: returns all nulls with no error.
 
-2. **pgcrypto** — any RPC using `digest()` for SHA-256 must include `extensions` in search_path: `SET search_path = public, extensions`.
+2. **pgcrypto** — any RPC using `digest()` must include `extensions` in search_path.
 
-3. **Never generate factual data via Claude API** — airport codes, wind data, hazards, etc. must come from the database. Claude API only generates narrative content.
+3. **Never generate factual data via Claude API** — airport codes, wind data, hazards, school names, visa requirements must come from the DB. Claude API generates narrative only.
 
 4. **Anon key only in frontend** — `VITE_KITEVERSE_SUPABASE_ANON_KEY`. Never expose service_role key.
 
-5. **Slug-based routing only** — no ID routes in the frontend.
+5. **Slug-based routing only** — no ID routes.
 
-6. **RPC-first** — never query tables directly from the frontend.
+6. **RPC-first for normalized tables** — never direct query. But supplementary tables (destination_wind_seasons, destination_areas etc.) DO have public read RLS and query directly.
 
-7. **ingest_reddit_posts signature** — final signature is `(input_slug TEXT, posts JSONB)`. The old single-param pg_net version was superseded in migration 019.
+7. **Schools RPC only** — `get_schools_by_destination_v1`. kite_schools table is DROPPED. Do not reference it.
 
-8. **approve_social_intel_row_v2 signature** — current is 3 params: `(p_id UUID, p_excluded_indices INT[] DEFAULT NULL, p_custom_venues JSONB DEFAULT NULL)`. The 2-param version was dropped in migration 032.
+8. **destination_media JOIN** — joins on `d.destination_id` (text) not `d.id` (uuid).
 
-9. **Section ID** — `pack` not `packing`. This was a bug that was fixed.
+9. **Section ID is `pack` not `packing`** — previously fixed bug, do not revert.
 
-10. **destination_media JOIN** — joins on `d.destination_id` (text) not `d.id` (uuid). Critical for hero image queries.
+10. **approve_social_intel_row_v2 signature** — 3 params: (p_id UUID, p_excluded_indices INT[] DEFAULT NULL, p_custom_venues JSONB DEFAULT NULL). The 2-param version was dropped in migration 032.
+
+11. **Mobile is primary.** Every component must be tested at 375px before committing. `hidden lg:block` on decision-critical content is a bug, not a feature.
+
+12. **TanStack Query v5 for all data.** No raw useEffect + useState for async data. No exceptions.
+
+13. **vaul for all bottom sheets.** No custom sheet components.
+
+14. **Tailwind v3 (NOT v4).** Syntax differences matter.
 
 ---
 
-## 8. DATA COLLECTION SCRIPTS
+## 8. DATA COLLECTION SCRIPTS (unchanged — Phase 1 complete)
 
-All data collection scripts live in `scripts/data-collection/` within this repo (migrated from `C:\Users\danwi\KiteVurse_DataCollection\` on 2026-05-26).
+All data collection scripts live in `scripts/data-collection/`. Launchers: `run_ingester.ps1`, `run_parser.ps1`. Python scripts: `kitevurse_places_ingester.py`, `kitevurse_perplexity_parser.py`, `kitevurse_perplexity_collector_v4.py`.
 
-### Launchers (entry points)
+Parser prompt map P7–P15 all complete. See previous reference version for full details.
 
-| Script | Purpose |
-|--------|---------|
-| `run_ingester.ps1` | Loads service role key from Windows Credential Manager → runs `kitevurse_places_ingester.py` |
-| `run_parser.ps1` | Loads service role key from Windows Credential Manager → runs `kitevurse_perplexity_parser.py` |
-| `run_collector.ps1` | Loads Perplexity API key from Windows Credential Manager (`KiteVurse:PERPLEXITY_API_KEY`) + service role key → runs `kitevurse_perplexity_collector_v5.py`. Pass all CLI args through. |
+---
 
-Key mechanism: both scripts read `Supabase CLI:supabase` from Windows Credential Manager, exchange it for the project service role key via Supabase Management API, set `$env:SUPABASE_SERVICE_ROLE_KEY_KV`, then `Set-Location $PSScriptRoot` before calling Python. Works from any working directory.
+## 9. MAINTENANCE SCRIPTS (unchanged)
 
-### Python Scripts
+Nightly auto-update at 5:00 AM via Windows Task Scheduler. Scripts in `scripts/maintenance/`. See previous reference version for setup and usage.
 
-| Script | Status | Purpose |
-|--------|--------|---------|
-| `kitevurse_places_ingester.py` | ✅ Active | Moves approved Google Places rows from `google_places_raw` → production venue tables. Only processes combos in `approved_social_intel`. |
-| `kitevurse_perplexity_parser.py` | ✅ Active | Reads `research_staging` → writes P7–P15 to production tables. Resume-safe via `perplexity_parser_progress.json`. |
-| `kitevurse_perplexity_collector_v5.py` | ✅ Active | Calls Perplexity API, writes to `research_staging`. Credentials from env vars (never hardcoded). Single PROMPTS dict with `enabled` boolean. P11, P14, P15 active by default. Resume-safe via `progress_v5.json`. |
-| `kitevurse_perplexity_collector_v4.py` | Retired | Replaced by v5. Had hardcoded credentials, bare relative path for OUTPUT_FOLDER, split PROMPTS/_DISABLED_PROMPTS dicts, and discarded staging insert return value. |
-| `kitevurse_perplexity_collector_v3.py` | Retired | P7–P13, v3 (improved JSON extraction) |
-| `kitevurse_perplexity_collector_v2.py` | Retired | P7–P13, v2 |
-| `kitevurse_perplexity_collector.py` | Retired | P1–P6, v1 |
-| `_fix_encoding.py` | One-time util | Replaced emoji with ASCII in parser.py — already applied |
+---
 
-### Parser Prompt Map (current — P7–P18 all complete)
+## 10. PROJECT SYSTEM PROMPTS (Phase 2 updated)
 
-| Prompt | Name | Target Table(s) |
-|--------|------|-----------------|
-| P7 | Culture & Safety | `culture_safety` (UPSERT on destination_id) |
-| P8 | Visa Requirements | `visa_requirements` (DELETE+INSERT per passport) |
-| P9 | Wind & Water | `destination_conditions` (UPDATE) + `destination_wind_seasons` (DELETE+INSERT per season) |
-| P10 | Destination Profile | `destination_editorial` (UPDATE) |
-| P11 | Spot Geometry | `kite_spots` (DELETE+INSERT per spot) |
-| P12 | Regulations | `spot_regulations` (DELETE+INSERT, UNIQUE on destination_id) |
-| P13 | Logistics | `destination_kiter_logistics` (DELETE+INSERT, UNIQUE on destination_id) |
-| P14 | Neighborhood & Area Intel | `destination_areas` (DELETE+INSERT) + `destination_editorial.areas_recommendation` (UPDATE) |
-| P15 | Kite Hubs & Scene | `kite_hubs` (DELETE+INSERT) + `destination_editorial.scene_summary` + `proximity_reality` (UPDATE) |
-| P16 | Kite Schools | `schools` — UPDATE only (enriches certifications, lesson_price_usd_from, accommodation_available where null; never inserts; trigger enforced in migration 043) |
-| P17 | Kite Accommodations | `kite_accommodations` (DELETE+INSERT, manually_verified=false rows only) |
-| P18 | Gear & Repair | `kite_gear_services` (DELETE+INSERT, manually_verified=false rows only) |
-| P19 | Daily Living | `destination_daily_living` (UPSERT on destination_id, one row per destination) |
+Fetch instruction for all Claude Code sessions:
+```
+At the start of every session, fetch and read:
+https://raw.githubusercontent.com/Kaivurse/kite-explorer/main/CLAUDE-REFERENCE-FULL.md
+This is the single source of truth for all KiteVurse context.
+```
 
-Run from kite-explorer root: `.\scripts\data-collection
+### 10B — Frontend / UI Dev (Phase 2 updated)
+
+```
+At the start of every session, fetch and read:
+https://raw.githubusercontent.com/Kaivurse/kite-explorer/main/CLAUDE-REFERENCE-FULL.md
+This is the single source of truth for all KiteVurse context.
+
+You are the frontend developer for KiteVurse (Phase 2 redesign).
+Stack: React 18 + TypeScript + Vite + Tailwind CSS v3 + TanStack Query v5 + vaul + sonner.
+Repo: C:\Users\danwi\kite-explorer. Dev server: localhost:8080. Shell: PowerShell (never &&).
+Active branch: feat/phase2-redesign.
+
+MANDATORY FIRST STEP: Read CLAUDE-REFERENCE-FULL.md and CLAUDE-DECISIONS.md before touching any file.
+
+Rules:
+- Mobile responsiveness is MANDATORY. Primary viewports: 375px and 390px. Test before committing.
+- `hidden lg:block` is NEVER acceptable for decision-critical content (stats, CTAs, warnings).
+- TanStack Query v5 for all data. No raw useEffect + useState for async data.
+- vaul for all bottom sheets. sonner for all toasts. No alternatives.
+- Supplementary tables (destination_wind_seasons, destination_areas, kite_hubs, etc.) query directly — no RPC.
+- Normalized tables (destination_conditions, destination_editorial, etc.) use get_destination_detail_by_slug_v1 RPC.
+- Schools: get_schools_by_destination_v1 only. kite_schools table is DROPPED — do not reference it.
+- Design tokens, colors, typography in CLAUDE-REFERENCE-FULL.md Design System section.
+- VerdictPill, DeviceFrame, VerdictBadge, RideableDaysDots spec in CLAUDE-REFERENCE-FULL.md.
+- Tailwind v3 NOT v4.
+- All interactive elements: min 44×44px touch target.
+- End every session with a HANDOFF block.
+```
+
+### 10A, 10C–10H — All other prompts (unchanged from previous version)
+
+---
+
+## FACEBOOK COMMUNITY STRATEGY (unchanged)
+
+See previous reference version for full post rotation, tone rules, and what NOT to do.
+
+Revenue streams: Booking.com affiliate (post-launch, 2-3 months traffic first), Skyscanner CPC, SafetyWing ($15-25/signup), KiteVurse Pro ($49/year Month 9). No affiliates until the site has a following.
