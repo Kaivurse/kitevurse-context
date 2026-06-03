@@ -1,6 +1,6 @@
 # CLAUDE-REFERENCE-FULL.md — KiteVurse Complete Technical Reference
 
-Generated: 2026-05-25 | Last updated: 2026-06-03 (Phase 2 frontend redesign underway — design system, destination page partial impl, live audit bugs, new tables 037-044, branch update)
+Generated: 2026-05-25 | Last updated: 2026-06-04 (Phase 2 frontend redesign underway — design system, destination page partial impl, live audit bugs, new tables 037-044, branch update)
 Source: schema_tables.json + all migration files + Edge Function source + frontend source + live browser audit
 Do NOT use Notes/DBSCHEMA.md — it is a pre-normalization snapshot and is stale.
 
@@ -120,7 +120,7 @@ Complete replacement of every page users see. The backend (Supabase DB, Edge Fun
 - **Visa data from visa_requirements table only.** Never from AI, never from destination_daily_living.
 - **Save/share conversion event:** "Save this plan" is the primary conversion. Save flow email entry = email capture + lead + conversion, in one action. Magic-link auth (Supabase signInWithOtp) — profile page at `/profile`.
 
-#### Phase 2 implementation status (as of June 3, 2026)
+#### Phase 2 implementation status (as of June 4, 2026)
 
 | Page / Feature | Status | Notes |
 |---|---|---|
@@ -799,7 +799,7 @@ Migrations 006-036 applied. See previous reference version for full list.
 | `038–043` | Intermediate migrations (content varies — check migration files directly) | ✅ Applied |
 | `044_drop_kite_schools.sql` | Dropped `kite_schools` table. `schools` table is the single source of truth for all school data (183 rows). | ✅ Applied |
 | `045_saved_trips.sql` | Will create `saved_trips` table for user saved trip plans. Required before auth/save feature. | 🔴 NOT YET APPLIED |
-| `049_destination_areas_display_name.sql` | Latest applied migration (as of 2026-06-03). | ✅ Applied |
+| `049_destination_areas_display_name.sql` | Latest applied migration (as of 2026-06-04). | ✅ Applied |
 
 **⚠️ Do not apply migration 045 until auth (magic link) is implemented.**
 
@@ -910,7 +910,7 @@ Phase 2 intake step order (to implement):
 
 ---
 
-## 6. DATA INGESTION STATE (as of 2026-06-03)
+## 6. DATA INGESTION STATE (as of 2026-06-04)
 
 All Phase 1 data collection complete.
 
