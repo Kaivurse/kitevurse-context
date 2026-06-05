@@ -140,16 +140,8 @@ Complete replacement of every page users see. The backend (Supabase DB, Edge Fun
 
 Full requirements: see `DESTINATION-PAGE-REQUIREMENTS.md` in the repo root (to be added by Dan after this session).
 
-**Critical bugs:**
-1. Stats band class `hidden lg:block` — Stats only show at 1280px+. Mobile and tablet show no stats.
-2. Plan My Trip CTA only at offsetTop 4205 in a 4389px page — no hero CTA on mobile.
-3. "The Catch" warning completely absent from DOM (`hasCatchText: false`).
-4. Wind Season + My Base in side-by-side two-column grid — when My Base spine grows tall, left column becomes empty void.
-5. WIND RELIABILITY stat shows wind speed "18-24 KT" — wrong. Should show reliability score /100.
-6. ~400px empty white space below invest footer.
-7. No hero image (placeholder only).
 
-**Priority fix order:** Bugs 5,1,4,6,3 first. Then hero H1 + CTA. Then progressive disclosure. Then mobile breakpoints. Then animations.
+
 
 #### New tables in Phase 2 (supplementary, public read RLS)
 
