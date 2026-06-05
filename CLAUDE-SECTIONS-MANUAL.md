@@ -60,6 +60,22 @@ Every Claude Code prompt from here forward includes mobile responsiveness as a r
 - 6-stat hero band squashes on mobile
 - These two ship together as one Claude Code session
 
+- #### Phase 2 implementation status (as of June 2, 2026)
+
+| Page / Feature | Status | Notes |
+|---|---|---|
+| Design system (Tailwind config, tokens, fonts) | 🟡 Partially implemented | Tokens in tailwind.config.ts but stats band has `hidden lg:block` bug |
+| Explorer page | 🔴 Not yet rebuilt | Old Explore.tsx still in place |
+| Destination page — hero | 🟡 Partial | Name shows correctly on mobile, stats band hidden on mobile, no Catch warning |
+| Destination page — wind season | 🟡 Working | Tabs work, rideable days text-only (no dots yet), wind bar present |
+| Destination page — My Base | 🟡 Working | 3 tabs render (4th missing), two-column layout bug, SOCIAL/EVENING open by default |
+| Destination page — mobile | 🟡 Partial | Device frame renders, bottom tab bar renders, no hero CTA on mobile |
+| Trip plan intake | 🔴 Not yet built | Old TripPlannerModal still in place |
+| Trip plan output | 🔴 Not yet built | Old TripPlanOutput still in place |
+| Authentication (magic link) | 🔴 Not built | Migration 045 saved_trips not yet run |
+| Profile page | 🔴 Not built | |
+| Shared view | 🔴 Not built | |
+
 #### 2B — Data Wiring: Destination Detail Sections
 
 Wire approved, ingested data into frontend sections that are currently empty or placeholder.
