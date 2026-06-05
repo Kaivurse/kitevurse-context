@@ -84,28 +84,6 @@ Wire approved, ingested data into frontend sections that are currently empty or 
 
 **The fix:** Audit every Claude API prompt in the Edge Function (`generate-trip-plan`) and rewrite the system prompt and call-level instructions to enforce human voice.
 
-#### 2D — P0 Bug Fixes (blocking soft launch)
-
-| # | Bug | Component | Session |
-|---|---|---|---|
-| 1 | No Layer 1 GO/NO-GO verdict card | TripPlanOutput | 1 session |
-| 2 | Visa chunk not rendering | TripPlanOutput / GettingThereSection | 1 session |
-| 3 | Trip Planner Modal is 4 steps, should be 3 | TripPlannerModal | 1 session |
-| 4 | "Flying From" is open text field (must be tap-only) | TripPlannerModal | same session as #3 |
-| 5 | BEST FOR / SKIP IF / WATCH OUT illegible on mobile | DestinationDetail hero | 1 session |
-| 6 | 6-stat hero band squashes on mobile | DestinationDetail hero | same session as #5 |
-
-#### 2E — P1 Bug Fixes (before launch, not blocking)
-
-| # | Bug | Component |
-|---|---|---|
-| 7 | Schools section old card styling | TripPlanOutput / OnTheWaterSection |
-| 8 | Destination airport not resolving correctly | TripPlanOutput / GettingThereSection |
-| 9 | Hardcoded ~$12/day scooter price — remove it | DestinationDetail / Section 04 |
-| 10 | FROM AIRPORT card full-width when only card | DestinationDetail / Section 04 |
-| 11 | Step 5 Budget too long (4 sub-sections) | TripPlannerModal |
-| 12 | Where to Stay cards — placeholder hatching, no photos | DestinationDetail / Section 02 |
-
 ---
 
 ### PHASE 3 — Trip Engine Upgrade
