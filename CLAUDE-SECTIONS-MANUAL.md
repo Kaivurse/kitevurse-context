@@ -163,6 +163,8 @@ One prompt at a time. Never write the next prompt until Dan confirms the previou
 ## DAN'S WORKING RULES (non-negotiable)
 
 - Dan is non-technical. Explain every file path, app, and button click explicitly — like explaining to someone who has never done it before.
+- If any task requires a multiple steps, only do 1 step at a time as there can steps where Dan is not familiar with the actual steps and will need assistance
+- If writing a prompt for any AI service, utilize the /prompt-master skill to write the prompts
 - Never give Dan a list of things to remember. Bake everything into files and scripts.
 - One task per session. No sprawl.
 - Every session needs tangible visible output — something Dan can click, see, or test.
