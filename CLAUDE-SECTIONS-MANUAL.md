@@ -56,10 +56,10 @@ No fixed launch deadline. Launch when the app is the best it can be.
 | Trip plan output `/trip/:slug` | ✅ Done | Section 02 = LOGISTICS, Section 03 = BASE |
 | Environment setup | ✅ Done | Session 0 complete. `.env` wired, migration 045 applied, Edge Functions deployed |
 | Auth foundation | ✅ Done | Session 1 complete. AuthContext, auth.ts, pending-trip.ts, AuthProvider all exist |
-| Save plan flow | 🟡 In progress | Session 2 running |
-| Share plan flow | 🔴 Not started | Session 3 — after Session 2 confirmed |
-| Profile page `/profile` | 🔴 Not started | Session 4 — after Session 3 confirmed |
-| Shared view `/trip/shared/:token` | 🔴 Not started | Session 4 |
+| Save plan flow | ✅ Done | Session 2 running |
+| Share plan flow | ✅ Done  | Session 3 — after Session 2 confirmed |
+| Profile page `/profile` | ✅ Done | Session 4 — after Session 3 confirmed |
+| Shared view `/trip/shared/:token` | ✅ Done  | Session 4 |
 
 **Playwright scores:** 70 passing / 7 pre-existing failures (being fixed in Session 2)
 
