@@ -73,9 +73,9 @@ One prompt at a time. Never write the next prompt until Dan confirms the previou
 |---|---|---|
 | Session 0 | Environment setup, migration 045, Edge Functions, Playwright auth | ✅ Complete |
 | Session 1 | Auth foundation — AuthContext, auth.ts, pending-trip.ts | ✅ Complete |
-| Session 2 | Save plan flow — SavePlanModal, useSaveTripPlan, wired into TripPlanOutput | 🟡 In progress |
-| Session 3 | Share plan flow — SharePlanModal, SharedTripView, share-token-lookup client | 🔴 Not started |
-| Session 4 | Profile page — full build, all states, DeleteAccountSheet, complete E2E suite | 🔴 Not started |
+| Session 2 | Save plan flow — SavePlanModal, useSaveTripPlan, wired into TripPlanOutput | ✅ Complete|
+| Session 3 | Share plan flow — SharePlanModal, SharedTripView, share-token-lookup client | ✅ Complete |
+| Session 4 | Profile page — full build, all states, DeleteAccountSheet, complete E2E suite | ✅ Complete |
 
 ---
 
