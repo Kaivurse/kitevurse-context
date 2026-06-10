@@ -8,7 +8,7 @@ and merges the result back into CLAUDE-REFERENCE-FULL.md.
 
 ## PHASE PLAN & ROADMAP
 
-*Last updated: June 9, 2026 — Phase 2 complete, Phase 3 starting.*
+*Last updated: June 10, 2026 — Phase 2 complete, Phase 3 starting.*
 
 ---
 
@@ -61,7 +61,7 @@ All pages built on the new design system. Real Supabase data throughout. Mobile-
 | Authentication (magic link) | ✅ Complete | Session 1 |
 | Save flow | ✅ Complete | Session 2 — overwrites on edit, blocks duplicate saves, styled delete confirm |
 | Share flow | 🔴 Not started | Session 3 — next phase |
-| Profile + shared view | 🔴 Not started | Session 4 — next phase |
+| Profile + shared view | ✅ Complete| Session 4 — next phase |
 | Tide module | ✅ Built | 10 files including WorldTidesProvider.ts, useTideData.ts, TideWindowChart.tsx |
 | Migration 045 (saved_trips) | ✅ Applied | |
 | Migration 056 (destination_tides_cache) | ⚠️ Pending apply | Created but not yet pushed to live DB — 35 total pending migrations need review before push |
@@ -79,12 +79,6 @@ All pages built on the new design system. Real Supabase data throughout. Mobile-
 - `VITE_WORLDTIDES_API_KEY` currently browser-exposed — acknowledged low-risk; move server-side to Edge Function in a future session
 - Git tag `tide-module-v1` created for easy revert
 
-#### QA bugs triaged — pending fix via Claude Code
-- Save button: duplicate saves in edge cases, read-only state when viewing from Profile
-- Profile: chip labels rendering blank (raw DB values not mapped to display labels), hero images missing from cards
-- Unauthenticated UX: magic link redirect takes user away from app — inline login needed
-- No Wind activities: need category/day grouping
-
 #### Security
 - Main Supabase project now on `sb_publishable_` key format; legacy JWT disabled (neutralises git history exposure)
 - `SERVICE_ROLE_KEY` naming inconsistency across Edge Functions — flagged for a dedicated fix session
@@ -97,9 +91,9 @@ All pages built on the new design system. Real Supabase data throughout. Mobile-
 
 | Step | Task | Status |
 |---|---|---|
-| 1 | Trip engine upgrade | 🔴 Not started |
-| 2 | Voice update (use the prompt from the June 6 session — not any older version) | 🔴 Not started |
-| 3 | lat/lng backfill via Google Places ingester re-run (Data Collection session) | 🔴 Not started |
+| 1 | Trip engine upgrade | ✅ COMPLETE |
+| 2 | Voice update (use the prompt from the June 6 session — not any older version) | ✅ COMPLETE |
+| 3 | lat/lng backfill via Google Places ingester re-run (Data Collection session) | 🟡 STARTING |
 | 4 | No Wind + Map feature | 🔴 HARD DEPENDENCY: venue tables lack lat/lng — only `kite_spots` has coords. Blocked until step 3 complete. |
 
 #### Phase 3 Map epic (locked design)
