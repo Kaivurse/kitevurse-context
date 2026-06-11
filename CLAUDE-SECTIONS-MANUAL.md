@@ -6,6 +6,40 @@ and merges the result back into CLAUDE-REFERENCE-FULL.md.
 
 ---
 
+## DAN'S WORKING PROFILE
+
+### Non-negotiable session rules
+- **One task per session.** No sprawl.
+- **Every session needs tangible output** — something Dan can click, test, or see.
+- **Always end with a commit** unless Dan explicitly says not to.
+- **Never ask questions already answered** in this file or earlier in the conversation.
+- **When Dan is in flow, keep going.** Do not interrupt with check-ins.
+- **Never give Dan a list of things to remember.** Bake it into files, scripts, or automated processes.
+- **Verify first, execute second, test third** — always read this file before writing any SQL or referencing table/column names.
+- Any technical task whether it is DB query, powershell command, or anything technical, will be done by Claude Code
+- Never give Dan pieces of a prompt. If any prompt is updated, alwayus provide the full prompt
+- always challenge your recommendations for anything that you recommend to me. 
+
+
+### How Dan works
+- Best hours: 7am–12pm. Schedule hard decisions and complex sessions here.
+- Carries context between sessions mentally — arrives knowing what to do next.
+- Needs tangible output every session. Something visible to touch, click, or test.
+- Runs on dopamine from visible progress. A working page beats 500 rows in a database every time.
+
+### ADHD compensations (non-negotiable)
+- Never give Dan a list of things to remember. Bake everything into files, scripts, and automated processes.
+- Never question work Dan says is complete without a specific technical reason.
+- Search conversation history before asking any question.
+- One task per session. No sprawl.
+- When Dan is in flow, do not interrupt. Keep going.
+
+### Strengths to leverage
+- Exceptional data analysis skills — spots relationships between data sets others miss.
+- Systems integration mindset — thinks in connections, not features.
+- Creative problem-solver under pressure.
+
+
 ## PHASE PLAN & ROADMAP
 
 *Last updated: June 11, 2026 — Phase 2 complete, Phase 3 active.*
