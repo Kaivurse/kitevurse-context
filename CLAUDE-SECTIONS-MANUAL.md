@@ -8,7 +8,7 @@ and merges the result back into CLAUDE-REFERENCE-FULL.md.
 
 ## PHASE PLAN & ROADMAP
 
-*Last updated: June 10, 2026 — Phase 2 complete, Phase 3 starting.*
+*Last updated: June 11, 2026 — Phase 2 complete, Phase 3 active.*
 
 ---
 
@@ -29,6 +29,8 @@ Not a booking site. Not a directory. The honest, AI-powered planning tool the ki
 | SafetyWing referral | $15–25 per signup | Live at launch |
 | **KiteVurse Pro** | **$49/year** | **Month 9** |
 
+Note: Booking.com requires regional approval + traffic proof — apply 2–3 months post-launch. Agoda rejected as placeholder affiliate. No accommodation booking links at launch — show price ranges from DB data only.
+
 ---
 
 ### The Five Phases
@@ -37,7 +39,7 @@ Not a booking site. Not a directory. The honest, AI-powered planning tool the ki
 |---|---|---|
 | **1 — Data Complete** | Finish collection, build review queue, ingest to production | ✅ Complete |
 | **2 — Frontend Integration** | Full UI rebuild, mobile-first, auth, save/share flow, tide module | ✅ Complete |
-| **3 — Trip Engine Upgrade** | Smarter planner, voice update, lat/lng backfill, No Wind + Map | 🟡 Starting |
+| **3 — Trip Engine Upgrade** | Data collection, smarter planner, voice update, modal restructure, No Wind + Map | 🟡 Active |
 | **4 — Soft Launch + Community** | Vercel deploy, Facebook engagement, real users | 🔴 Not started |
 | **5 — Agents + Pro + Scale** | Agentic system, KiteVurse Pro, expand to 76 destinations | 🔴 Not started |
 
@@ -45,114 +47,153 @@ Not a booking site. Not a directory. The honest, AI-powered planning tool the ki
 
 ### PHASE 2 — Frontend Integration ✅ COMPLETE
 
-**Completed June 9, 2026.**
+**Completed June 9, 2026.** All pages built and all sessions complete. No remaining QA bugs.
 
-All pages built on the new design system. Real Supabase data throughout. Mobile-first. Auth live.
-
-#### What shipped
-
-| Page / Feature | Status | Notes |
-|---|---|---|
-| Design system (Tailwind tokens, Inter Tight, JetBrains Mono) | ✅ Complete | |
-| Explorer page | ✅ Complete | |
-| Destination page | ✅ Complete | Full rebuild including season switcher, My Base picker, tide module |
-| Trip plan intake (3-step) | ✅ Complete | Tap-only steps 2–3, nationality picker, nights badge |
-| Trip plan output (6 sections) | ✅ Complete | DB-first render, AI narrative streams in |
-| Authentication (magic link) | ✅ Complete | Session 1 |
-| Save flow | ✅ Complete | Session 2 — overwrites on edit, blocks duplicate saves, styled delete confirm |
-| Share flow | 🔴 Not started | Session 3 — next phase |
-| Profile + shared view | ✅ Complete| Session 4 — next phase |
-| Tide module | ✅ Built | 10 files including WorldTidesProvider.ts, useTideData.ts, TideWindowChart.tsx |
-| Migration 045 (saved_trips) | ✅ Applied | |
-| Migration 056 (destination_tides_cache) | ⚠️ Pending apply | Created but not yet pushed to live DB — 35 total pending migrations need review before push |
-
-#### Locked product decisions (save flow)
-- Editing a saved plan overwrites the existing record with a `last_updated` timestamp — no new record created
-- Save button blocks duplicate saves
-- Save button hidden in profile read-only view; Share remains visible
-- In-app styled delete confirmation — no browser-native dialog
-
-#### Tide module decisions (locked)
-- Provider: WorldTides API (`worldtides.info`). $9.99 prepaid pack purchased. Key obtained.
-- Destination page shows: verdict + safety notes + range only (no tide times — discovery mode)
-- Trip plan output shows: compact white card in right panel, below base card, above Plan My Trip CTA. Actionable times shown here.
-- `VITE_WORLDTIDES_API_KEY` currently browser-exposed — acknowledged low-risk; move server-side to Edge Function in a future session
-- Git tag `tide-module-v1` created for easy revert
-
-#### Security
-- Main Supabase project now on `sb_publishable_` key format; legacy JWT disabled (neutralises git history exposure)
-- `SERVICE_ROLE_KEY` naming inconsistency across Edge Functions — flagged for a dedicated fix session
+| Page / Feature | Status |
+|---|---|
+| Design system | ✅ |
+| Explorer page | ✅ |
+| Destination page | ✅ |
+| Trip plan intake (3-step) | ✅ |
+| Trip plan output (6 sections) | ✅ |
+| Authentication (magic link) | ✅ |
+| Save flow | ✅ |
+| Share flow | ✅ |
+| Profile page | ✅ |
+| Shared view | ✅ |
+| Tide module | ✅ |
+| Migration 045 (saved_trips) | ✅ Applied |
+| Migration 056 (destination_tides_cache) | ⚠️ Built, not yet applied to live DB — review all 35 pending migrations before push |
 
 ---
 
-### PHASE 3 — Trip Engine Upgrade 🟡 STARTING
+### PHASE 3 — Trip Engine Upgrade 🟡 ACTIVE
 
-**Locked order. Do not resequence.**
+**Locked sequence. Do not resequence.**
 
 | Step | Task | Status |
 |---|---|---|
-| 1 | Trip engine upgrade | ✅ COMPLETE |
-| 2 | Voice update (use the prompt from the June 6 session — not any older version) | ✅ COMPLETE |
-| 3 | lat/lng backfill via Google Places ingester re-run (Data Collection session) | 🟡 STARTING |
-| 4 | No Wind + Map feature | 🔴 HARD DEPENDENCY: venue tables lack lat/lng — only `kite_spots` has coords. Blocked until step 3 complete. |
+| 1 | P-next data collection (structured cost fields) | 🔴 Not started |
+| 2 | Trip engine upgrade (wire all inputs) | 🔴 Not started |
+| 3 | Voice update | 🔴 Not started |
+| 4 | Modal restructure (add trip goal, move base) | 🔴 Not started |
+| 5 | lat/lng backfill via Google Places ingester re-run | 🔴 Not started |
+| 6 | No Wind + Map feature | 🔴 HARD DEPENDENCY on step 5 |
 
-#### Phase 3 Map epic (locked design)
+#### P-next Data Collection
+
+Claude Code reads `scripts/data-collection/`, determines the next prompt number, builds a new Perplexity collector targeting structured cost data for all 25 active destinations.
+
+**Fields to collect (structured, not prose):**
+- Accommodation price range per night: budget_low_usd, budget_mid_usd, budget_high_usd (near kite spot)
+- Gear rental day rate: already partially in kite_gear_services but inconsistent — verify and fill gaps
+- Transport cost: structured low/high range (not prose) — replaces transport_price_range free text
+- Lesson cost: already in schools.lesson_price_usd_from — verify coverage across all 25 destinations
+
+#### Trip Engine Personalisation Map (locked)
+
+Every modal input must drive output. Current gap analysis:
+
+| Input | Currently wired | Gap |
+|---|---|---|
+| Nationality | Visa section partial | Visa cost not in trip total |
+| Dates | Verdict ✅ Season ✅ Trip total ✅ | Rental total (day rate × nights) not shown |
+| Group type | Lifestyle ✅ No Wind tone ✅ | Costs not multiplied by headcount |
+| Skill level | Kite sizes ✅ Verdict tone partial | Lesson costs not shown for beginners |
+| Weight | Kite quiver ✅ | Complete — nothing missing |
+| Gear situation | Day rate ✅ Customs/stranded risk ✅ | Total rental cost not calculated |
+| Budget level | Accommodation tercile partial | Sleep + No Wind + Lifestyle not filtered by budget |
+| Trip goal | ❌ Not yet in modal | Drives verdict framing, lifestyle, no wind, costs priorities |
+| Base | ✅ Area picker in modal | Not yet driving Sleep section recommendations |
+
+**Tier 1 — Pure frontend logic, no new data needed:**
+- Multiply costs by group headcount (solo=1, partner=2, friends=3, family=4)
+- Show rental total (day rate × nights) not just day rate
+- Add visa cost to trip total from existing visa_requirements data
+
+**Tier 2 — Data exists, needs wiring:**
+- Lesson costs for beginners from schools.lesson_price_usd_from
+- Budget level filtering accommodation cards in Sleep section
+- Budget level influencing No Wind activity suggestions
+
+**Tier 3 — Data gaps, need P-next collection:**
+- Accommodation price ranges (null for many destinations)
+- Structured transport costs (currently prose strings)
+
+#### Modal Restructure (LOCKED — build after trip engine upgrade)
+
+| Step | Name | Questions |
+|---|---|---|
+| 1 — You | Who you are | Group type · Skill level · Trip goal |
+| 2 — Your Setup | Logistics | Weight · Gear situation · Budget |
+| 3 — When & Where | Trip details | Nationality · Arrival · Departure · Base |
+
+**Trip goal options (locked voice):**
+- Sessions — I'm here to kite
+- Progress — I want to level up
+- Explore — kite and see the place
+- Chill — easy rhythm, wind is a bonus
+
+Trip goal drives: verdict framing, lifestyle section content, no wind day suggestions, costs priorities.
+
+Do NOT build the modal restructure until the trip engine upgrade is complete — trip goal input is meaningless until the engine can act on it.
+
+#### Costs Section Redesign (locked spec)
+
+Desktop/tablet: 4-column grid (ACCOMMODATION · FOOD · KITING · TRANSPORT) + trip total row + affiliate footer.
+Mobile: single column stack.
+
+**Personalisation rules (build during trip engine upgrade):**
+- Multiply all costs by group headcount
+- Accommodation: tercile filter by budget level
+- Kiting: $0 own kit / day rate × nights renting / 60% × nights mix
+- Lesson cost added for skill = learning or getting-there
+- Visa cost added from visa_requirements
+- Trip total = (accommodation + food + kiting + transport + visa + lessons) × nights
+
+**Affiliate footer (always shown):**
+- ✈ Flights not included — search Skyscanner →
+- 🛡 Travel insurance from ~$45/month — SafetyWing →
+
+**Transport display:** use parseTransportPrice() utility to extract price range from prose string. Never show raw DB string.
+
+#### Phase 3.5 — Explorer Hero Rebuild
+
+Replace placeholder hero content with high-converting landing page experience. Build AFTER trip engine upgrade — hero should showcase what's real and working, not promise features still being built.
+
+#### Phase 3 Map Epic (locked design)
+
 One component, two contexts:
-- **No Wind mini-map** — venue pins by category
-- **Trip Treasure Map** — personalised to user's trip: base, spots, hubs, stays, no-wind, recovery
+- No Wind mini-map — venue pins by category
+- Trip Treasure Map — personalised: base, spots, hubs, stays, no-wind, recovery
 
-Blocked until lat/lng backfill is complete.
-
-#### No Wind section
-No interim changes this phase — full rebuild alongside Map in Phase 3.
-
-#### Pending actions before starting Phase 3
-1. Apply migration 056 to live database (review all 35 pending migrations first — run `npx supabase db push --linked` only after review)
-2. Fix QA bugs listed above via Claude Code (one prompt per bug set)
-3. Resolve `SERVICE_ROLE_KEY` naming inconsistency across Edge Functions
-4. Move `VITE_WORLDTIDES_API_KEY` server-side to Edge Function
+HARD DEPENDENCY: venue tables lack lat/lng. Only kite_spots has coords. Backfill first via Google Places ingester re-run.
 
 ---
 
 ### PHASE 4 — Soft Launch + Community
 
 #### Vercel Deployment Checklist
-- [ ] Add `vercel.json` with SPA rewrite rules
-- [ ] Set env vars: `VITE_KITEVERSE_SUPABASE_URL` + `VITE_KITEVERSE_SUPABASE_ANON_KEY`
-- [ ] Confirm correct Supabase project (`xthaiitjoccrrqivjlor`)
+- [ ] Add vercel.json with SPA rewrite rules
+- [ ] Set env vars: VITE_KITEVERSE_SUPABASE_URL + VITE_KITEVERSE_SUPABASE_ANON_KEY
+- [ ] Confirm correct Supabase project (xthaiitjoccrrqivjlor)
 - [ ] End-to-end test all 25 destination pages
 - [ ] Trip plan generation test: Dakhla, Tarifa, Boracay
 - [ ] Mobile test on real iPhone (not just Chrome DevTools)
 
 #### Facebook Community Strategy
 
-The kitesurfing community lives on Facebook groups. That's where buying decisions happen.
+Be a kiter first, founder second. 6 weeks genuine participation before any promotional posting.
 
-**The core principle: be a kiter first, founder second.**
+| Type | Frequency |
+|---|---|
+| Local knowledge | 2–3×/week |
+| Honest destination take | 1×/week |
+| Community question | 1–2×/week |
+| KiteVurse soft mention | 1–2×/month |
+| Trip plan share | 1–2×/month |
 
-6 weeks genuine manual participation before any promotional posting.
-
-**Post types (rotate weekly):**
-
-| Type | Frequency | What it looks like |
-|---|---|---|
-| Local knowledge | 2–3×/week | "Just back from Dakhla — thermals kick in reliably around 1pm in December." |
-| Honest destination take | 1×/week | "Boracay in November: wind's more consistent than the reputation suggests." |
-| Community question | 1–2×/week | "Anyone been to Phan Rang recently? Trying to nail the best window." |
-| KiteVurse soft mention | 1–2×/month | "I built a tool that puts this kind of info together — worth a look if you're planning." |
-| Trip plan share | 1–2×/month | Screenshot of a real KiteVurse trip plan for a destination the group is actively discussing |
-
-**Tone rules:**
-- First person: "I found," "in my experience," "what I noticed"
-- Include honest negatives: "the accommodation there is genuinely limited"
-- No marketing language. Ever.
-- Drop links only when someone explicitly asked for recommendations
-
-**What NOT to do:**
-- Never cold-post "check out my new platform"
-- Never respond to every destination question with a KiteVurse link
-- Never post the same message across multiple groups
-- Never use: "excited to share," "game changer," "revolutionary"
+Voice: first person, honest negatives, no marketing language. Never cold-post platform links.
 
 ---
 
@@ -160,39 +201,20 @@ The kitesurfing community lives on Facebook groups. That's where buying decision
 
 #### KiteVurse Agentic System
 
-**Agents to build (in order):**
-
-| Agent | What it really is | Build when |
-|---|---|---|
-| Community submission form | Automated form → admin queue → your approval | Phase 5A (start here) |
-| Spot verification via schools | Email outreach → follow-up → response parsing | Phase 5B |
-| Facebook content scheduling | n8n + Claude API generates post drafts → you approve | Phase 5B |
-| Analytics monitor | Scheduled report → Claude summarises → Slack/email | Phase 5C (only when real traffic exists) |
-
-Start with the community submission form. Lowest risk, highest learning density.
-
-Stack: Claude API + n8n.
-
-Multi-agent coordination layer (agentic dev team) — deferred to Phase 5. KiteVurse's existing documentation is strong raw material but introducing the coordination layer mid-phase creates more overhead than value at current stage.
+| Agent | Build when |
+|---|---|
+| Community submission form | Phase 5A |
+| Spot verification via schools | Phase 5B |
+| Facebook content scheduling | Phase 5B |
+| Analytics monitor | Phase 5C |
 
 #### KiteVurse Pro ($49/year)
 
 Don't build until 200+ free users actively using trip planning.
 
-Likely scope:
-- Side-by-side destination comparison
-- Saved trip plans (already built in Phase 2 — gates on Pro in Phase 5)
-- Month-by-month wind calendar for all destinations
-- Early access to new destinations
-- Advanced personalisation (progression tracking)
+#### Scale to 76 Destinations
 
-#### Scale to 76 Staged Destinations
-
-76 destinations already seeded (`is_active = false`).
-- Run Perplexity v4 for all 76
-- Run Google Places for all 76
-- Activate in batches of 10–15
-- ⚠️ Fix DELETE + INSERT overwrite problem before building periodic refresh — risk of overwriting manually curated data
+Fix DELETE + INSERT overwrite problem before building periodic refresh.
 
 ---
 
@@ -200,44 +222,43 @@ Likely scope:
 
 | Decision | What | Why |
 |---|---|---|
-| Data source split | Google Places = venues. Perplexity = context/narrative. | Never ask Perplexity to re-collect what Google Places has. |
-| Structured JSON output | All Perplexity prompts return pure JSON | Eliminates 40% null rate from label mismatch. |
-| Data availability flag | Every response includes `data_availability.complete` | Drives frontend display logic for sparse destinations. |
-| Sparse data = honest info | Never show empty cards | Absence of data tells users something real about the destination. |
-| RPC-first | Never direct table queries | RLS on normalized tables requires SECURITY DEFINER on every RPC. |
-| SECURITY DEFINER | Mandatory on all RPCs joining normalized tables | Missing this = silent all-nulls bug with no error message. |
-| Slug routing | `/destinations/:slug` always | No ID routes. |
-| No text fields in modal | Tap-only Trip Planner steps 2–3 | Reduces friction. Enforces structure. |
-| Claude API never generates facts | No airport codes, wind data, hazards from AI | Mauritius hallucination (SIR vs MRU) made this non-negotiable. |
-| Human voice | Anti-AI baseline in all content | Users trust honesty and imperfection over polished AI prose. |
-| RPC uses `dest.id` not `dest.destination_id` | UUID FK for all supplementary table queries | `destination_id` is the text code — wrong FK for joined queries. |
-| `kite_schools` table DROPPED | `schools` table is source of truth (183 rows) | Use `get_schools_by_destination_v1` only. Never query `schools` directly. |
-| Save flow: overwrite not append | Editing a saved plan overwrites with `last_updated` timestamp | No duplicate records per user per destination. |
-| Tide provider: WorldTides API | `worldtides.info` — lat/lng-based, ~8,000 global stations | $9.99 prepaid pack. Key in `VITE_WORLDTIDES_API_KEY` — move server-side in Phase 3. |
-| No Wind section: no interim changes | Full rebuild alongside Map in Phase 3 | Partial rebuild creates rework. Wait for Map dependency to be resolved. |
-| Map: one component, two contexts | No Wind mini-map + Trip Treasure Map | Shared component, different data inputs. Blocked on lat/lng backfill. |
+| Data source split | Google Places = venues. Perplexity = context/narrative | Never mix |
+| Structured JSON output | All Perplexity prompts return pure JSON | Eliminates 40% null rate |
+| RPC-first | Never direct table queries from frontend or Edge Function | RLS on normalized tables |
+| SECURITY DEFINER | Mandatory on all RPCs joining normalized tables | Missing = silent all-nulls |
+| Claude API never generates facts | Airport codes, wind data, hazards, school names from DB only | Mauritius hallucination |
+| No text fields in modal | Tap-only steps 1–3 | Enforces structured data |
+| Sparse data = honest info | Never show empty cards | Absence of data is honest |
+| Save flow: overwrite not append | Editing overwrites with last_updated timestamp | No duplicates |
+| Tide provider: WorldTides API | worldtides.info — move API key server-side in Phase 3 | Low risk pre-launch |
+| No accommodation booking links at launch | Show DB price ranges only | No approved affiliate yet |
+| Transport cost: always parsed | Use parseTransportPrice() — never show raw prose string | Le Morne bug |
+| Trip goal: 4 options | Sessions / Progress / Explore / Chill | Locked voice, no changes |
+| Modal: 3 steps locked | You / Your Setup / When & Where | Base moved to Step 3 |
 
 ---
 
 ## CLAUDE CODE PROMPT DISCIPLINE
 
-- Write ONE prompt at a time. Never write the next until Dan confirms the previous session succeeded. No exceptions.
+- ONE prompt at a time. Never write the next until Dan confirms the previous session succeeded.
 - Every prompt requires a Step 0 verify-before-touch gate.
-- Reference only files actually accessible in the repo.
-- Never reference `KITEVURSE-TECHNICAL-REQUIREMENTS.md` or `KITEVURSE-PHASE2-HANDOFF.md` in prompts (deleted).
-- Playwright/E2E tests live in `e2e/` (not `tests/`).
-- Always deliver the complete, final, ready-to-paste prompt in one block. Never deliver in pieces. No "here's the updated section." One complete prompt every time.
+- Every prompt requires a thorough QA section: manual test steps at 375px + 768px + 1280px, happy path + edge cases, console error check, npm run build pass.
+- Never reference KITEVURSE-TECHNICAL-REQUIREMENTS.md or KITEVURSE-PHASE2-HANDOFF.md in prompts (deleted).
+- Playwright/E2E tests live in e2e/ (not tests/).
+- Always deliver complete, final, ready-to-paste prompt in one block.
+- Shell: PowerShell always — no && chaining, use ; or separate commands.
+- Supabase client: always import from @/integrations/supabase/client.
 
 ---
 
 ## CONTENT & VOICE RULES (LOCKED)
 
-- Claude API never generates facts — airport codes, wind data, hazards, school names come from DB only
-- Edge Function voice: contractions, simple words, honest about limits
-- Banned AI prose: `presents`, `establishes`, `ecosystem`, `optimal`, `aforementioned`, `facilitates`
+- Claude API never generates facts
+- Banned: presents, establishes, ecosystem, optimal, aforementioned, facilitates, leverages
 - Schools: comparison CTA line only in trip plan output — never school cards
-- `research_staging.raw_response` cannot be cast with `::jsonb` directly — always use `SUBSTRING + POSITION` to extract fields, or check with `LEFT(raw_response, 500)` first
-- Citation artifacts from Perplexity must be stripped: `text.replace(/\[\d+\]/g, '').trim()`
+- Trip goal voice: Sessions / Progress / Explore / Chill — never change these labels
+- research_staging.raw_response: always use SUBSTRING + POSITION, never ::jsonb direct cast
+- Transport cost: always use parseTransportPrice() utility — never raw string in UI
 
 ---
 
@@ -245,9 +266,10 @@ Likely scope:
 
 | Action | Priority | Notes |
 |---|---|---|
-| Apply migration 056 to live DB | HIGH | Review all 35 pending migrations before running `npx supabase db push --linked` |
-| Fix QA bugs — save button + profile chips + hero images | HIGH | One Claude Code prompt |
-| Fix unauthenticated UX — inline magic link (no redirect away from app) | HIGH | One Claude Code prompt |
-| Fix No Wind activities — category/day grouping | MEDIUM | One Claude Code prompt |
-| Resolve `SERVICE_ROLE_KEY` naming inconsistency across Edge Functions | MEDIUM | Dedicated session |
-| Move `VITE_WORLDTIDES_API_KEY` server-side to Edge Function | LOW | Future session |
+| Apply migration 056 to live DB | HIGH | Review all 35 pending migrations first |
+| P-next data collection session | HIGH | First Phase 3 session — Claude Code determines prompt number, builds collector |
+| Trip engine upgrade | HIGH | After P-next data ingested |
+| Voice update | HIGH | After trip engine upgrade |
+| Modal restructure | MEDIUM | After trip engine upgrade — add trip goal, move base to Step 3 |
+| Resolve SERVICE_ROLE_KEY naming inconsistency | MEDIUM | Dedicated session |
+| Move VITE_WORLDTIDES_API_KEY server-side | LOW | Future session |
