@@ -73,7 +73,7 @@ Not a booking site. Not a directory. The honest, AI-powered planning tool the ki
 |---|---|---|
 | **1 — Data Complete** | Finish collection, build review queue, ingest to production | ✅ Complete |
 | **2 — Frontend Integration** | Wire data into UI, mobile-first rebuild, all pages built | ✅ Complete (June 9, 2026) |
-| **3 — Trip Engine Upgrade** | Smarter planner, better AI calls, voice, Off The Water, Day Plan generator | 🟡 Active |
+| **3 — Trip Engine Upgrade** | Smarter planner, better AI calls, voice, Off The Water, Day Plan generator | ✅ Complete (June 12, 2026)|
 | **4 — Soft Launch + Community** | Vercel deploy, Facebook engagement, real users | 🔴 Not started |
 | **5 — Agents + Pro + Scale** | Agentic system, KiteVurse Pro, expand to 76 destinations | 🔴 Not started |
 
@@ -131,7 +131,7 @@ Trip goal drives: verdict framing, lifestyle narrative, Off The Water content pr
 | Enriched DB data injected into prompts | ✅ Complete |
 | Off The Water section built | ✅ Complete |
 | Tools sheet cleanup (rename nowind → dayplan) | ✅ Complete |
-| Day Plan generator | 🟡 Placeholder in DAY PLAN tab — not built |
+| Day Plan generator | ✅ Complete |
 | Explorer hero banner rebuild | 🔴 Not started |
 | Migration 056 (tides cache) applied to live DB | 🔴 Pending — review all pending migrations before push |
 
