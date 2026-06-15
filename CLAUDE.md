@@ -1,6 +1,6 @@
 # CLAUDE-REFERENCE-FULL.md — KiteVurse Complete Technical Reference
 
-**Last updated:** 2026-06-11 (manually updated — nightly auto-update job discontinued)
+**Last updated:** 2026-06-15 (manually updated — nightly auto-update job discontinued)
 **Maintenance:** Manual. Update this file when architecture, phase status, or product decisions change.
 **Source of truth for:** All KiteVurse context — DB schema, RPCs, Edge Functions, frontend, phase status.
 **Do NOT use:** Notes/DBSCHEMA.md (pre-normalization snapshot, stale)
@@ -74,7 +74,7 @@ Not a booking site. Not a directory. The honest, AI-powered planning tool the ki
 | **1 — Data Complete** | Finish collection, build review queue, ingest to production | ✅ Complete |
 | **2 — Frontend Integration** | Wire data into UI, mobile-first rebuild, all pages built | ✅ Complete (June 9, 2026) |
 | **3 — Trip Engine Upgrade** | Smarter planner, better AI calls, voice, Off The Water, Day Plan generator | ✅ Complete (June 12, 2026)|
-| **4 — Soft Launch + Community** | Vercel deploy, Facebook engagement, real users | 🔴 Not started |
+| **4 — Soft Launch + Community** | Vercel deploy, Facebook engagement, real users | 🟡 Active (June 15, 2026)|
 | **5 — Agents + Pro + Scale** | Agentic system, KiteVurse Pro, expand to 76 destinations | 🔴 Not started |
 
 ---
@@ -132,7 +132,7 @@ Trip goal drives: verdict framing, lifestyle narrative, Off The Water content pr
 | Off The Water section built | ✅ Complete |
 | Tools sheet cleanup (rename nowind → dayplan) | ✅ Complete |
 | Day Plan generator | ✅ Complete |
-| Explorer hero banner rebuild | 🔴 Not started |
+| Explorer hero banner rebuild | ✅ Complete |
 | Migration 056 (tides cache) applied to live DB | 🔴 Pending — review all pending migrations before push |
 
 **⚠️ Migration risk:** There are approximately 35+ pending migrations between 036 and current state. Review all before pushing to live DB. Do not push blindly.
