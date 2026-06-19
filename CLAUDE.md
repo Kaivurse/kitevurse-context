@@ -1,6 +1,6 @@
-# CLAUDE-REFERENCE-FULL.md — KiteVurse Complete Technical Reference
+markdown# CLAUDE-REFERENCE-FULL.md — KiteVurse Complete Technical Reference
 
-**Last updated:** 2026-06-15 (manually updated — nightly auto-update job discontinued)
+**Last updated:** 2026-06-19 (manually updated — nightly auto-update job discontinued)
 **Maintenance:** Manual. Update this file when architecture, phase status, or product decisions change.
 **Source of truth for:** All KiteVurse context — DB schema, RPCs, Edge Functions, frontend, phase status.
 **Do NOT use:** Notes/DBSCHEMA.md (pre-normalization snapshot, stale)
@@ -16,16 +16,19 @@
 
 ### How sessions end (Claude Code)
 Every session ends with a standardised handoff block — no exceptions:
-
-```
 --- HANDOFF ---
+
 Commit: <hash>
+
 Branch: <branch>
+
 Files changed: <list>
+
 Test results: <pass/fail summary>
+
 Next: <what to do next session>
+
 --- END HANDOFF ---
-```
 
 ### Non-negotiable session rules
 - **One task per session.** No sprawl.
@@ -73,8 +76,8 @@ Not a booking site. Not a directory. The honest, AI-powered planning tool the ki
 |---|---|---|
 | **1 — Data Complete** | Finish collection, build review queue, ingest to production | ✅ Complete |
 | **2 — Frontend Integration** | Wire data into UI, mobile-first rebuild, all pages built | ✅ Complete (June 9, 2026) |
-| **3 — Trip Engine Upgrade** | Smarter planner, better AI calls, voice, Off The Water, Day Plan generator | ✅ Complete (June 12, 2026)|
-| **4 — Soft Launch + Community** | Vercel deploy, Facebook engagement, real users | 🟡 Active (June 15, 2026)|
+| **3 — Trip Engine Upgrade** | Smarter planner, better AI calls, voice, Off The Water, Day Plan generator | ✅ Complete (June 12, 2026) |
+| **4 — Soft Launch + Community** | Landing page live, MVP shipped, Facebook engagement, real users | 🟡 Active (June 19, 2026) |
 | **5 — Agents + Pro + Scale** | Agentic system, KiteVurse Pro, expand to 76 destinations | 🔴 Not started |
 
 ---
@@ -112,15 +115,9 @@ Trip goal drives: verdict framing, lifestyle narrative, Off The Water content pr
 
 ---
 
-### PHASE 3 — Active 🟡
+### PHASE 3 — Complete ✅
 
-**Phase 3 sequence (locked):**
-1. Trip engine upgrade (discovery → implementation)
-2. Voice update (back-to-back with engine upgrade)
-3. Off The Water — Day Plan generator build
-4. Phase 3.5: Explorer hero banner rebuild
-
-**Current Phase 3 state:**
+**Completed June 12, 2026.**
 
 | Item | Status |
 |---|---|
@@ -139,22 +136,49 @@ Trip goal drives: verdict framing, lifestyle narrative, Off The Water content pr
 
 ---
 
-### PHASE 4 — Groups Tool (Not started)
+### LANDING PAGE — Complete ✅
 
-**Blocked until:** lat/lng backfill complete AND map build complete.
+**Completed June 19, 2026.** MVP shipped to production on main branch at kitevurse.com.
 
-Groups Tool features:
-- Map (KVMap component, Mapbox GL JS via react-map-gl)
-- Tide Window Times (WorldTides integration already built)
-- No Wind Day Generator (4 modes: mood-based, group-aware, location-aware, spontaneous tap)
+| Section | Status |
+|---|---|
+| Hero (locked copy) | ✅ Complete |
+| Research Problem section | ✅ Complete |
+| How It Works (4 steps + real screenshots) | ✅ Complete |
+| Closing CTA section | ✅ Complete |
+| Privacy & Terms page (/privacy) | ✅ Complete |
+| Footer (Privacy & Terms combined) | ✅ Complete |
 
-**Day Generator architecture (Phase 4):**
-- Extends `generateNoWindItinerary()` reusable function from Edge Function
-- MUST be built as reusable — not rebuilt
-- Input: venue data + lat/lng + group type + mood/energy level + base area
-- Output: sequenced day with timeline, real venues, honest notes
-- Hard dependency: lat/lng backfill complete (✅ done — 1,830 coordinates captured)
-- Hard dependency: map build complete
+**Screenshots in use (public folder):**
+- `screen-explore.jpeg` → Section 01 (Find your destination)
+- `screen-destination.jpeg` + `screen-base.jpg` → Section 02 (Know the spot)
+- `screen-tripplan.jpeg` + `screen-plan-offwater.jpeg` → Section 03 (Get your plan)
+- `screen-profile.jpeg` → Section 04 (Save and share)
+
+**Locked copy:**
+- Hero italic problem line: *"You've done the research. You're still guessing."*
+- Hero headline: *"Know the spot before you book it."*
+- Closing CTA headline: *"Stop guessing. Start knowing."*
+- Closing CTA sub: *"Know exactly what you're flying into before you commit."*
+- Closing CTA button: *"Find your spot. Build your plan →"*
+
+---
+
+### PHASE 4 — Soft Launch (Active) 🟡
+
+**Started June 19, 2026.**
+
+| Item | Status |
+|---|---|
+| Landing page live | ✅ Complete |
+| MVP shipped to kitevurse.com | ✅ Complete |
+| Facebook community engagement | 🔴 Not started |
+| First real users | 🔴 Not started |
+| SafetyWing affiliate | 🔴 Not started |
+| Skyscanner affiliate | 🔴 Not started |
+| Booking.com affiliate application | 🔴 Blocked — needs 2–3 months live traffic first |
+
+**Facebook agent build order (when ready):** Dennis → Margaret → Percy → Ruff → Gnasher → Curly → Joey → Mr. Wilson.
 
 ---
 
@@ -213,13 +237,15 @@ Five sections. The old six-section layout (which included separate LIFESTYLE and
 - Output: sequenced day with timeline, real venues, honest notes
 
 **KITEVURSE_VOICE system prompt (applied to all calls):**
-```
 Write like a real person who kites. Use contractions. Prefer simple words.
+
 Understate rather than oversell.
+
 Avoid: 'presents,' 'establishes,' 'ecosystem,' 'optimal,' 'showcases,' 'leverages.'
+
 Be honest about limitations. Specific beats vague. Short beats long.
+
 If you'd never say it to a kiter at the bar, remove it.
-```
 
 **Known issue:** Rate limit risk on 4 simultaneous calls. Retry logic or sequential `no_wind_day` call needed.
 
@@ -263,32 +289,10 @@ type ToolsTab = 'map' | 'tide' | 'dayplan'
 
 - **MAP** — KVMap component (Mapbox GL JS via react-map-gl). Built.
 - **TIDES** — TideWindowChart. Built. Hidden when `tide_dependent = false`.
-- **DAY PLAN** — 🟡 Placeholder only. Generator not yet built.
+- **DAY PLAN** — ✅ Built.
 
 **"At the spot" strip label:** "Map · Tides · Day plan"
 Tides chip hidden when `tide_dependent = false`.
-
-### Day Plan Generator — Target Architecture (not yet built)
-
-Lives in Tools sheet, DAY PLAN tab.
-
-**UI:**
-- Multi-select mood picker (reuses intent categories from Off The Water)
-- Duration: Full day / Half day
-- Time of day: Morning / Afternoon / Evening
-- "Build my day →" button
-- Output: sequenced itinerary with timeline, real venue cards, honest notes
-
-**Backend:**
-- Edge Function: `action: 'day_plan'` routing
-- Calls `generateNoWindItinerary()` (already exists, reusable)
-- Real venues injected from DB — no AI-invented venue names
-- Discovery report: `docs/no-wind-generator-plan.md` (exists in repo — contains mood → data source mapping and DB query findings)
-
-**Build sequence:**
-1. Read `docs/no-wind-generator-plan.md` first
-2. Session 1: Edge Function `action: 'day_plan'` routing + multi-mood support
-3. Session 2: Frontend — mood picker, duration, time, generate button, timeline result cards
 
 ---
 
@@ -739,43 +743,44 @@ Key columns: destination_slug (text), prompt_id, prompt_name, status (pending_re
 ---
 
 **explore_destinations_multi_sport_v1**
-```
 Parameters: input_month int, input_sports text[], input_region text, input_skill_level text
+
 Returns: destination cards (23 columns), sorted by destination_strength_score DESC
+
 SECURITY DEFINER: ✅
-```
 Reads from normalized tables. Only returns `is_active = true` destinations.
 
 ---
 
 **get_destination_detail_by_slug_v1**
-```
 Parameters: input_slug text
+
 Returns: single row with ~57 aliased fields
+
 SECURITY DEFINER: ✅
-```
 All field names are **aliased** — never use raw DB column names.
 Reads from: destinations, destination_conditions, destination_sports, destination_safety, destination_transport, destination_budget, destination_lifestyle, destination_infrastructure, destination_tides, destination_gear, destination_editorial, destination_media.
 
 ---
 
 **get_schools_by_destination_v1**
-```
 Parameters: input_slug text
+
 Returns: table of school records
+
 SECURITY DEFINER: ✅
+
 Sort: kv_pick DESC, manually_verified DESC, capability_count DESC, school_name ASC
-```
 Joins schools to destinations via destination_id. Never query `schools` table directly.
 
 ---
 
 **get_fitness_by_destination_v1**
-```
 Parameters: input_slug text
+
 Returns: table (one row per facility)
+
 SECURITY DEFINER: ✅
-```
 
 ---
 
@@ -837,6 +842,99 @@ Enriched DB data injected into all prompts: wind seasons, kite hubs, daily livin
 
 ---
 
+## 3B. THIRD-PARTY INTEGRATIONS
+
+---
+
+### Mapbox (KVMap component)
+
+**Package:** `react-map-gl@8.1.1`, `mapbox-gl@3.24.0`
+**Token name:** `kitevurse_map` (stored in environment variables)
+**Token env var:** `VITE_MAPBOX_TOKEN`
+
+**Component:** `KVMap` — two contexts:
+- `trip_plan` — shows venue pins relevant to the user's trip plan
+- `no_wind` — shows all venues for off-the-water day planning
+
+**Map style:** Dark minimal basemap
+
+**Three-layer system:**
+- Kite infrastructure (always-on)
+- Trip picks (on by default)
+- Category pills (off by default, togglable)
+
+**Category pill set:** Coffee, Food, Market, Pharmacy, Scooter, Yoga, Gym, Massage, Nightlife
+
+**Pin tap behaviour:** Opens vaul bottom sheet with venue detail
+
+**Hard dependencies:**
+- lat/lng backfill complete ✅ (1,830 coordinates, migration 057)
+- Lives in Tools sheet, MAP tab
+
+---
+
+### WorldTides (Tide module)
+
+**Service:** WorldTides API (prepaid pack)
+**Cost model:** Prepaid — $9.99 pack purchased. No recurring cost until pack exhausted.
+**Integration:** `TideWindowChart` component in Tools sheet, TIDES tab
+
+**Behaviour:**
+- Hidden entirely when `destination_tides.tide_dependent = false`
+- Shown when `tide_dependent = true`
+- Tides chip in "At the spot" strip also hidden when `tide_dependent = false`
+
+**Migration 056:** Tides cache table — built but NOT YET APPLIED to live DB. Review before pushing.
+
+---
+
+### Open-Meteo
+
+**Service:** Open-Meteo Archive API (free, no API key required)
+**Edge Function:** `fetch-open-meteo`
+**Parser:** `parse-open-meteo` (read-only verification)
+
+**What it collects:** Monthly historical weather — temperature, wind, precipitation
+**Storage:** `open_meteo_raw` — 300 rows (12 months × 25 active destinations). UNIQUE (destination_id, year, month).
+**Ingestion RPC:** `ingest_open_meteo` — requires pgcrypto → `SET search_path = public, extensions`
+**Status:** ✅ Complete. All 25 active destinations ingested.
+
+---
+
+### Google Places
+
+**Service:** Google Places Text Search API (v1)
+**Cost:** ~$0.032 per search
+**API key env var:** `GOOGLE_PLACES_API_KEY` (stored in Edge Function secrets)
+**Edge Function:** `search-google-places`
+**Parser:** `parse-google-places` (read-only verification)
+
+**What it collects:** Venue records — name, category, rating, google_maps_url, lat/lng
+**Storage:** `google_places_raw` — 2,264 rows. UNIQUE (destination_id, category, place_name).
+**Ingestion RPC:** `ingest_google_places` — param is `input_category` not `category`
+**Migration 058:** Updated RPC to capture lat/lng from API response ✅ Applied
+**Places ingester script:** `kitevurse_places_ingester.py` — moves approved rows from `google_places_raw` → production venue tables. Updated to propagate lat/lng.
+**Admin tool:** `add_manual_venue_v1` RPC — writes directly to `google_places_raw` bypassing staging queue
+
+**Status:** ✅ Complete. All categories, all 25 active destinations. 275+ rows in staging unreviewed — blocking production data for those venues.
+
+---
+
+### Seabreeze Forums
+
+**Service:** seabreeze.com.au forum scraper
+**Edge Function:** `scrape-seabreeze-forums`
+**Note:** May 403 from cloud IPs — run with caution
+
+**What it collects:** Forum threads mentioning destination names — community conditions reports, local knowledge
+**Storage:** `seabreeze_raw` — ~50 rows
+**Status:** ✅ Complete. Low volume by design — Seabreeze is supplementary signal only.
+
+---
+---
+
+---
+
 ## 4. MIGRATION HISTORY
 
 ### Confirmed Applied (root `migrations/` + `supabase/migrations/`)
@@ -879,6 +977,11 @@ Enriched DB data injected into all prompts: wind seasons, kite hubs, daily livin
 
 ### Pages (`src/pages/`)
 
+**LandingPage** — `/landing` (or root before auth)
+- Sections: Hero, Research Problem, How It Works, Closing CTA, Footer
+- Privacy & Terms at `/privacy`
+- Screenshots in `public/` folder
+
 **ExplorePage.tsx** — `/`
 - RPC: `explore_destinations_multi_sport_v1`
 - Hero, destination picker sheet (vaul), filter bar, destination card grid
@@ -916,10 +1019,9 @@ Enriched DB data injected into all prompts: wind seasons, kite hubs, daily livin
 **TripPlanOutput.tsx** — Trip plan output (main output component)
 
 Section IDs and nav:
-```
 WATER · THERE & IN · SLEEP · OFF THE WATER · COSTS
+
 id:  water    therein   sleep   offwater     costs
-```
 
 NDJSON stream section mapping:
 | id | Content |
@@ -957,8 +1059,6 @@ All steps tap-only except nationality search. Step indicator: `STEP X / 3 — [N
 Category set: Coffee, Food, Market, Pharmacy, Scooter, Yoga, Gym, Massage, Nightlife.
 
 Vaul bottom sheet on pin tap.
-
-**Hard dependency:** lat/lng backfill complete (✅ done). Map build: Phase 4 Groups Tool.
 
 ---
 
@@ -1009,11 +1109,9 @@ Vaul bottom sheet on pin tap.
 ## 7. ENVIRONMENT
 
 ### Active Supabase Project: `xthaiitjoccrrqivjlor`
-
-```
 VITE_KITEVERSE_SUPABASE_URL    — active project URL  ✅ use this
+
 VITE_KITEVERSE_SUPABASE_ANON_KEY — active anon key   ✅ use this
-```
 
 ⚠️ Legacy project `ouqqfpqsbaijbinpyiio` — `VITE_SUPABASE_*` vars. DO NOT USE for new work.
 
@@ -1028,13 +1126,13 @@ VITE_KITEVERSE_SUPABASE_ANON_KEY — active anon key   ✅ use this
 | `FACEBOOK_USER_TOKEN` | post-facebook-comments |
 
 ### Codebase
-
-```
 Repo:       C:\Users\danwi\kite-explorer
-Branch:     feat/phase2-redesign
+
+Branch:     main
+
 Dev server: localhost:8080 (npm run dev)
+
 Shell:      PowerShell — no && chaining, use ; or separate commands
-```
 
 ### Stack
 
@@ -1057,20 +1155,27 @@ Shell:      PowerShell — no && chaining, use ; or separate commands
 Radix UI primitives and shadcn/ui installed. Use them.
 
 ### Design Tokens (locked)
-
-```
 Page bg:         #f6f4ef
+
 Dark bg:         #0a0e14
+
 Accent:          #2DABE5
+
 Accent-deep:     #006194
+
 Green:           #7ed3a2
+
 Amber:           #d99a3a
+
 Muted text:      #6b7a8d
+
 Label text:      #54606c
+
 Inverted text:   #e8eaed
+
 Border light:    rgba(10,14,20,0.09)
+
 Border dark:     rgba(255,255,255,0.08)
-```
 
 Fonts: `'Inter Tight'` (display/headings), `'JetBrains Mono'` (labels/numbers/eyebrows).
 
@@ -1113,11 +1218,6 @@ All in `scripts/data-collection/` in repo.
 
 **Nightly auto-update job: DISCONTINUED.** This file is manually maintained. Update it when architecture, phase status, or product decisions change. Commit and push to `github.com/Kaivurse/kitevurse-context` (public) after updating.
 
-Manual trigger (retired — scripts still in repo but not scheduled):
-```powershell
-.\scripts\maintenance\run_nightly_update.ps1
-```
-
 ---
 
 ## 10. CRITICAL RULES SUMMARY
@@ -1140,17 +1240,19 @@ Manual trigger (retired — scripts still in repo but not scheduled):
 
 ---
 
-## 11. WHAT'S NEXT (Phase 3 active work)
+## 11. WHAT'S NEXT (Phase 4 — Soft Launch)
 
-**Immediate next task:** Day Plan generator build.
+**MVP is live at kitevurse.com. Landing page complete. All app pages shipped.**
 
-Prerequisites:
-1. Read `docs/no-wind-generator-plan.md` — confirm it exists and contains mood → data source mapping
-2. Confirm DAY PLAN tab placeholder state in TripPlanOutput.tsx
-3. Session 1: Edge Function `action: 'day_plan'` routing + multi-mood support for `generateNoWindItinerary()`
-4. Session 2: Frontend — mood picker (multi-select), duration, time of day, generate button, timeline result cards
+**Immediate priorities:**
+1. Facebook community engagement — post in kite groups, drive first real users
+2. Monitor real user behaviour via PostHog
+3. SafetyWing + Skyscanner affiliate links — activate
+4. Booking.com affiliate application — blocked until 2–3 months live traffic
 
-**After Day Plan generator:**
-- Explorer hero banner rebuild (Phase 3.5)
-- Migration 056 review + apply (tides cache)
-- Full pending migration review before any DB push
+**Pending technical:**
+- Migration 056 (tides cache) — review and apply when ready
+- Full pending migration audit before any DB push (~35+ between 036 and current)
+- Day Plan generator Groups Tool (Phase 4) — next major build when ready
+
+**Facebook agent build order (when ready):** Dennis → Margaret → Percy → Ruff → Gnasher → Curly → Joey → Mr. Wilson.
