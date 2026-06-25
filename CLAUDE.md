@@ -1211,6 +1211,10 @@ All in `scripts/data-collection/` in repo.
 | P13 | Logistics | destination_kiter_logistics |
 | P14 | Neighborhood & Area Intel | destination_areas + editorial.areas_recommendation |
 | P15 | Kite Hubs & Scene | kite_hubs + editorial.scene_summary + proximity_reality |
+| P16 | School Amenities | schools — UPDATE-only, never INSERT. Google Places owns the inserts (migration 043 trigger blocks any insert with data_source='perplexity').
+Columns populated (only when currently null): lesson_price_usd_from (from price_per_hour_usd), certifications (adds "IKO"), accommodation_available (set true only), plus data_source='perplexity_enriched' and updated_at.|
+| P17 | Accommodation Context | kite_accommodations (created by migration 039). |
+| P19 |  Daily Living | destination_daily_living (created by migration 041).|
 | P21 | Comprehensive Cost Data | kite_accommodations, kite_gear_services, schools, destination_daily_living |
 
 ---
@@ -1254,6 +1258,6 @@ All in `scripts/data-collection/` in repo.
 **Pending technical:**
 - Migration 056 (tides cache) — review and apply when ready
 - Full pending migration audit before any DB push (~35+ between 036 and current)
-- Day Plan generator Groups Tool (Phase 4) — next major build when ready
+- Day Plan generator Groups Tool (Phase 4) — next major build when ready --- this will only be worked on wwhen Dan has been accepted into the Viator Affiliate program 
 
 **Facebook agent build order (when ready):** Dennis → Margaret → Percy → Ruff → Gnasher → Curly → Joey → Mr. Wilson.
