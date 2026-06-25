@@ -1,4 +1,3 @@
-markdown# CLAUDE-REFERENCE-FULL.md — KiteVurse Complete Technical Reference
 
 **Last updated:** 2026-06-19 (manually updated — nightly auto-update job discontinued)
 **Maintenance:** Manual. Update this file when architecture, phase status, or product decisions change.
