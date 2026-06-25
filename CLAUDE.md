@@ -162,8 +162,9 @@ Trip goal drives: verdict framing, lifestyle narrative, Off The Water content pr
 - Closing CTA button: *"Find your spot. Build your plan →"*
 
 ---
-
-### PHASE 4 — Soft Launch (Active) 🟡
+### Phase 4 - Add New Destinations Active 🟡
+---
+### PHASE 5 — Soft Launch (Paused) 🟡
 
 **Started June 19, 2026.**
 
@@ -181,7 +182,7 @@ Trip goal drives: verdict framing, lifestyle narrative, Off The Water content pr
 
 ---
 
-### PHASE 5 — Agents + Pro + Scale
+### PHASE 6 — Agents + Pro + Scale
 
 - KiteVurse Pro ($49/year) — don't build until 200+ free users actively using trip planning
 - Scale to 76 destinations (already seeded as `is_active = false`)
