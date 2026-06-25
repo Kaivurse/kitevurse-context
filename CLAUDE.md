@@ -10,7 +10,6 @@
 
 ### How sessions start
 - Fetch and read this file at the start of every session
-- Also fetch: `https://raw.githubusercontent.com/Kaivurse/kitevurse-context/refs/heads/main/CLAUDE-SECTIONS-MANUAL.md`
 - Never ask Dan to re-explain context — derive it from these files
 
 ### How sessions end (Claude Code)
