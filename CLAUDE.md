@@ -1,5 +1,5 @@
 
-**Last updated:** 2026-06-19 (manually updated — nightly auto-update job discontinued)
+**Last updated:** 2026-06-25 (manually updated — nightly auto-update job discontinued)
 **Maintenance:** Manual. Update this file when architecture, phase status, or product decisions change.
 **Source of truth for:** All KiteVurse context — DB schema, RPCs, Edge Functions, frontend, phase status.
 **Do NOT use:** Notes/DBSCHEMA.md (pre-normalization snapshot, stale)
@@ -1095,13 +1095,15 @@ Vaul bottom sheet on pin tap.
 | seabreeze_raw | ~50 rows | Complete |
 | social_intel_staging | ~300 pending | Post-dedup |
 | google_places_raw | 2,264 rows | All categories, all destinations |
-| Perplexity P7–P21 | All complete | Production tables populated |
+| Perplexity P7–P21 | All complete | Production tables populated. P15/P20 fully aligned June 25, 2026. |
 | Venue lat/lng | 1,830 coords | Backfill complete (migration 057) |
 | P21 cost data | 25 destinations | Ingested to production tables |
 
 **Ingestion rule:** DELETE + INSERT pattern currently in use. Must switch to merge logic before Q3 refresh to avoid overwriting manually curated data.
 
 **Ingestion scripts must use:** `npx supabase db query --linked` — NOT REST API with publishable key. `run_collector.ps1` sets the publishable key (anon role) which has no UPDATE permissions. PostgREST silently returns HTTP 204 for zero-row updates — script appears to succeed but writes nothing.
+
+**P15/P20 alignment complete — June hub names live in kite_hubs, P20 narratives matched across all 25 destinations
 
 ---
 
@@ -1190,11 +1192,11 @@ All in `scripts/data-collection/` in repo.
 | Script | Status | Purpose |
 |---|---|---|
 | `kitevurse_places_ingester.py` | ✅ Active | Moves approved Google Places rows → production venue tables. Updated to propagate lat/lng (migration 057). |
-| `kitevurse_perplexity_parser.py` | ✅ Active | Reads research_staging → writes P7–P21 to production tables. Resume-safe via progress JSON. |
-| `kitevurse_perplexity_collector_v4.py` | ✅ Active | Calls Perplexity API, writes to research_staging. P1–P13 disabled. |
+| `kitevurse_perplexity_parser_v2.py` | ✅ Active | Reads research_staging → writes P7–P21 to production tables. CLI write path. Resume-safe via perplexity_parser_progress_v2.json. Three bugs fixed June 25: --output json flag, array JSON parsing, P20 hub string decode. |
+| `kitevurse_perplexity_collector_v5.py` | ✅ Active | Calls Perplexity API P7–P21, writes to research_staging. Resume-safe via progress_v5.json.|
 | Retired collectors (v1–v3) | Retired | — |
 
-**Launchers:** `run_ingester.ps1`, `run_parser.ps1` — both load service role key from Windows Credential Manager.
+**Launchers:** run_collector.ps1 / run_parser_v2.ps1 — both load credentials from Windows Credential Manager. Always run from C:\Users\danwi\kite-explorer.
 
 **Parser Prompt Map (P7–P21 all complete):**
 
@@ -1236,7 +1238,7 @@ All in `scripts/data-collection/` in repo.
 13. **`dest.id` (UUID)** — FK for all supplementary table queries. Never use `dest.destination_id` (text code) as FK.
 14. **Off The Water section** — replaces both old Lifestyle (04) and No Wind (05). Section nav is 5 sections, not 6.
 15. **Day Plan generator** — extends `generateNoWindItinerary()`. Must be reusable. Discovery report: `docs/no-wind-generator-plan.md`.
-
+16. P20 collection depends on P15 being parsed into kite_hubs first — always parse P15 before re-collecting P20.
 ---
 
 ## 11. WHAT'S NEXT (Phase 4 — Soft Launch)
