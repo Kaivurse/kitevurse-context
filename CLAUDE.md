@@ -76,8 +76,9 @@ Not a booking site. Not a directory. The honest, AI-powered planning tool the ki
 | **1 — Data Complete** | Finish collection, build review queue, ingest to production | ✅ Complete |
 | **2 — Frontend Integration** | Wire data into UI, mobile-first rebuild, all pages built | ✅ Complete (June 9, 2026) |
 | **3 — Trip Engine Upgrade** | Smarter planner, better AI calls, voice, Off The Water, Day Plan generator | ✅ Complete (June 12, 2026) |
-| **4 — Soft Launch + Community** | Landing page live, MVP shipped, Facebook engagement, real users | 🟡 Active (June 19, 2026) |
-| **5 — Agents + Pro + Scale** | Agentic system, KiteVurse Pro, expand to 76 destinations | 🔴 Not started |
+| **4 — Add new destinations** | Update data collectors with enhanced prompts, identify hero images, generate single CLI entry point for complete data destination objects | 🟡 Active (June 25, 2026) |
+| **5 — Soft Launch + Community** | Landing page live, MVP shipped, Facebook engagement, real users | 🟡 Paused (June 25, 2026) |
+| **6 — Agents + Pro + Scale** | Agentic system, KiteVurse Pro, expand to 76 destinations | 🔴 Not started |
 
 ---
 
